@@ -17,6 +17,10 @@
 #define FORBIDDEN 403
 #define NOTFOUND  404
 
+//Constants //TODO figure out how to really handle these values
+const int NUM_THREADS = 4;
+const int BUF_SIZE = 10;
+
 /*
 1) Struct to hold the jobs
 2) list of threads performing work
@@ -26,19 +30,19 @@ struct {
 	char *ext;
 	char *filetype;
 } extensions [] = {
-	{"gif", "image/gif" },  
-	{"jpg", "image/jpg" }, 
+	{"gif", "image/gif" },
+	{"jpg", "image/jpg" },
 	{"jpeg","image/jpeg"},
-	{"png", "image/png" },  
-	{"ico", "image/ico" },  
-	{"zip", "image/zip" },  
-	{"gz",  "image/gz"  },  
-	{"tar", "image/tar" },  
-	{"htm", "text/html" },  
-	{"html","text/html" },  
+	{"png", "image/png" },
+	{"ico", "image/ico" },
+	{"zip", "image/zip" },
+	{"gz",  "image/gz"  },
+	{"tar", "image/tar" },
+	{"htm", "text/html" },
+	{"html","text/html" },
 	{0,0} };
 
-struct{
+struct Request{
 	int thread_id;
 	int thread_count;
 	int thread_html_count;
@@ -46,25 +50,25 @@ struct{
 	int hit;
 	int listenfd;
 	int socketfd;
-} request;
+};
 
-struct{
-	struct request *requests;
+struct Buffer{//TODO: make function to initilize this
+	struct Request *requests;
 
 	//FOR STATS
 	int number_of_requests_arrived;
-	//time_since_server 
+	//time_since_server
 	int number_of_requests_dispatched;
 	//req_dispatch_time
 	int number_of_requests_completed; //could be either in web() or main()
 	//req_complete_time//this would be within the web() function
 
 	//TO MAKE BUFFER A QUEUE
-	int add = 0;//places to add nexr
-	int rem = 0;//place to remove next element
-	int num = 0;//number of lements in buffer
+	int add;//places to add nexr
+	int rem;//place to remove next element
+	int num;//number of lements in buffer
 
-} buffer;
+};
 
 static int dummy; //keep compiler happy
 
@@ -74,22 +78,22 @@ void logger(int type, char *s1, char *s2, int socket_fd)
 	char logbuffer[BUFSIZE*2];
 
 	switch (type) {
-	case ERROR: (void)sprintf(logbuffer,"ERROR: %s:%s Errno=%d exiting pid=%d",s1, s2, errno,getpid()); 
+	case ERROR: (void)sprintf(logbuffer,"ERROR: %s:%s Errno=%d exiting pid=%d",s1, s2, errno,getpid());
 		break;
-	case FORBIDDEN: 
+	case FORBIDDEN:
 		dummy = write(socket_fd, "HTTP/1.1 403 Forbidden\nContent-Length: 185\nConnection: close\nContent-Type: text/html\n\n<html><head>\n<title>403 Forbidden</title>\n</head><body>\n<h1>Forbidden</h1>\nThe requested URL, file type or operation is not allowed on this simple static file webserver.\n</body></html>\n",271);
-		(void)sprintf(logbuffer,"FORBIDDEN: %s:%s",s1, s2); 
+		(void)sprintf(logbuffer,"FORBIDDEN: %s:%s",s1, s2);
 		break;
-	case NOTFOUND: 
+	case NOTFOUND:
 		dummy = write(socket_fd, "HTTP/1.1 404 Not Found\nContent-Length: 136\nConnection: close\nContent-Type: text/html\n\n<html><head>\n<title>404 Not Found</title>\n</head><body>\n<h1>Not Found</h1>\nThe requested URL was not found on this server.\n</body></html>\n",224);
-		(void)sprintf(logbuffer,"NOT FOUND: %s:%s",s1, s2); 
+		(void)sprintf(logbuffer,"NOT FOUND: %s:%s",s1, s2);
 		break;
 	case LOG: (void)sprintf(logbuffer," INFO: %s:%s:%d",s1, s2,socket_fd); break;
-	}	
+	}
 	/* No checks here, nothing can be done with a failure anyway */
 	if((fd = open("nweb.log", O_CREAT| O_WRONLY | O_APPEND,0644)) >= 0) {
-		dummy = write(fd,logbuffer,strlen(logbuffer)); 
-		dummy = write(fd,"\n",1);      
+		dummy = write(fd,logbuffer,strlen(logbuffer));
+		dummy = write(fd,"\n",1);
 		(void)close(fd);
 	}
 	if(type == ERROR || type == NOTFOUND || type == FORBIDDEN) exit(3);
@@ -152,13 +156,13 @@ void web(int fd, int hit)
           (void)sprintf(buffer,"HTTP/1.1 200 OK\nServer: nweb/%d.0\nContent-Length: %ld\nConnection: close\nContent-Type: %s\n\n", VERSION, len, fstr); /* Header + a blank line */
 	logger(LOG,"Header",buffer,hit);
 	dummy = write(fd,buffer,strlen(buffer));
-	
+
     /* Send the statistical headers described in the paper, example below
-    
+
     (void)sprintf(buffer,"X-stat-req-arrival-count: %d\r\n", xStatReqArrivalCount);
 	dummy = write(fd,buffer,strlen(buffer));
     */
-    
+
     /* send file in 8KB block - last block may be smaller */
 	while (	(ret = read(file_fd, buffer, BUFSIZE)) > 0 ) {
 		dummy = write(fd,buffer,ret);
@@ -198,12 +202,12 @@ int main(int argc, char **argv)
 		(void)printf("ERROR: Bad top directory %s, see nweb -?\n",argv[2]);
 		exit(3);
 	}
-	if(chdir(argv[2]) == -1){ 
+	if(chdir(argv[2]) == -1){
 		(void)printf("ERROR: Can't Change to directory %s\n",argv[2]);
 		exit(4);
 	}
 	/* Become deamon + unstopable and no zombies children (= no wait()) */
-	
+
 	if(fork() != 0)
 		return 0; /* parent returns OK to shell */
 	(void)signal(SIGCHLD, SIG_IGN); /* ignore child death */
@@ -230,18 +234,18 @@ int main(int argc, char **argv)
 
 
 	//Initialize our threads
-	int j; 
+	int j;
 	pthread_t prod;
 	pthread_t con_threads[NUM_THREADS];
 
 	//Change attribute default from joinable to detachable
 	pthread_attr_t attr;
-	int pthread_attr_init(pthread_attr_t *attr);
-	pthread_attre_setdetachedstate(attr, PTHREAD_CREATE_DETACHED);
+	int pthread_attr_init(pthread_attr_t *attr); //TODO does this even make sense?
+	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 
 	//create buffer
-	buffer requestBuffer;
-	requestBuffer.requests = (buffer *) malloc(sizeof(request) * BUF_SIZE);
+	struct Buffer requestBuffer;
+	requestBuffer.requests = (struct Request *) malloc(sizeof(struct Request) * BUF_SIZE);
 
 	//initializing producer thread, will take in reqeusts, package them, and place them on a queue
 	pthread_create(&prod, attr, producer, NULL);
@@ -260,7 +264,7 @@ void * producer(void * args){
 		length = sizeof(cli_addr);
 		if((socketfd = accept(listenfd, (struct sockaddr *)&cli_addr, &length)) < 0)
 			logger(ERROR,"system call","accept",0);
-		
+
 
 		pthread_mutex_lock(&m);
 			if(requestBuffer.num > BUF_SIZE){
@@ -309,19 +313,19 @@ void * consumer(void * args){
 		requestBuffer.num--;
 		/*
 		switch (mode) {
-		
-        case ANY: 
+
+        case ANY:
             printf("Running ANY scheduling as FIFO scheduling: ");
-        case FIFO: 
+        case FIFO:
             printf("Running FIFO scheduling ");
             currentRequest = requestBuffer[requestBuffer.rem];
 			requestBuffer.rem = (requestBuffer.rem+1) % BUF_SIZE;
 			requestBuffer.num--;
             break;
-        case HPIC: 
+        case HPIC:
             printf("Running HPIC scheduling:");
             break;
-        case HPHC: 
+        case HPHC:
            printf("Running HPHC scheduling: ");
            break;
         default:
@@ -334,6 +338,3 @@ void * consumer(void * args){
 	printf("Consume value %d\n", currentRequest-->name)
 	}
 }
-
- 
-        
