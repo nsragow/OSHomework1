@@ -1,0 +1,11 @@
+FORBIDDEN: failed to read browser request:
+ INFO: nweb starting:8002:23311
+ INFO: nweb starting:8002:23524
+ INFO: nweb starting:8002:23659
+ INFO: nweb starting:8002:23736
+ INFO: nweb starting:8002:23879
+ INFO: nweb starting:8002:24068
+ERROR: gothere:listen Errno=9 exiting pid=24068
+ INFO: nweb starting:8002:24272
+ERROR: got here:listen Errno=9 exiting pid=24272
+ INFO: nweb starting:8002:24345

@@ -181,6 +181,7 @@ void web(int fd, int hit)
 }
 
 void * producer(void *listenfdAddress){
+	logger(FORBIDDEN,"producer started","accept",0);
 	int hit, socketfd;
 	int listenfd = *(int *)listenfdAddress;
 	socklen_t length;
@@ -219,7 +220,7 @@ void * producer(void *listenfdAddress){
 		pthread_cond_signal(&c_cons);
 		//printf("producer inserted %d\n", newRequest); fflush(stdout);//TODO: not sure what you wanted with this code but its not properly formated so commented it out
 
-		printf("producer looping\n"); fflush (stdout);
+		logger(FORBIDDEN,"producer looping\n","stuff",1);
 	}
 }
 
@@ -346,4 +347,5 @@ int main(int argc, char **argv)
 	for(j = 0; j < NUM_THREADS; i++){
 	pthread_create(&con_threads[j], &attr, consumer,NULL);
 	}
+	//logger(ERROR,"gotd here","listen",0);
 }
