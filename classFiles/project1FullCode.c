@@ -21,6 +21,12 @@
 const int NUM_THREADS = 4;
 const int BUF_SIZE = 10;
 
+//intiating mutex and conditions from the start so that it could be shared by both the consumer and producer method
+//without having to make it a parameter
+pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t c_cons = PTHREAD_COND_INITIALIZER;
+pthread_cond_t c_prod = PTHREAD_COND_INITIALIZER;
+
 /*
 1) Struct to hold the jobs
 2) list of threads performing work
@@ -69,6 +75,8 @@ struct Buffer{//TODO: make function to initilize this
 	int num;//number of lements in buffer
 
 };
+//Creating buffer up here!
+struct Buffer requestBuffer;
 
 static int dummy; //keep compiler happy
 
@@ -172,11 +180,95 @@ void web(int fd, int hit)
 	exit(1);
 }
 
+void * producer(int *listenfdAddress){
+	int hit, socketfd;
+	int listenfd = *listenfdAddress;
+	socklen_t length;
+
+	static struct sockaddr_in cli_addr; /* static = initialised to zeros */
+
+	for(hit=1; ;hit++) {
+		length = sizeof(cli_addr);
+		if((socketfd = accept(listenfd, (struct sockaddr *)&cli_addr, &length)) < 0)
+			logger(ERROR,"system call","accept",0);
+
+
+		pthread_mutex_lock(&m);
+			if(requestBuffer.num > BUF_SIZE){
+				exit(1);//buffer overflow
+			}
+			while(requestBuffer.num == BUF_SIZE) {
+				pthread_cond_wait(&c_prod, &m);
+			}
+			//critical section: create request object
+			struct Request newRequest;
+			bzero(&newRequest, sizeof(newRequest));
+			newRequest.thread_id = requestBuffer.number_of_requests_dispatched;
+			newRequest.thread_count = 0;
+			newRequest.thread_html_count = 0;
+			newRequest.thread_image_count = 0;
+			newRequest.hit = hit;//the hit in the for loop (which may have to be reconfigured?)
+			newRequest.listenfd = listenfd;//from earlier in the code
+			newRequest.socketfd = socketfd;////from earlier in the code
+			//and add the reqeust object to the buffer
+			requestBuffer.requests[requestBuffer.add] = newRequest;
+			requestBuffer.add = (requestBuffer.add +1) % BUF_SIZE;
+			requestBuffer.num++;
+
+		pthread_mutex_unlock(&m);
+		pthread_cond_signal(&c_cons);
+		print("producer inserted %d\n", newRequest); fflush(stdout);
+
+		print("producer quiting\n"); fflush (stdout);
+	}
+}
+
+void * consumer(void * args){
+	struct Request currentRequest;
+	while(1){
+		pthread_mutex_lock(&m);
+		if(requestBuffer.num < 0){
+			exit(1);//meaningless error messsage
+		}
+		while(requestBuffer.num == 0){
+			pthread_cond_wait (&c_cons, &m);
+		}
+		currentRequest = requestBuffer.requests[requestBuffer.rem];
+		requestBuffer.rem = (requestBuffer.rem+1) % BUF_SIZE;
+		requestBuffer.num--;
+		/*
+		switch (mode) {
+
+        case ANY:
+            printf("Running ANY scheduling as FIFO scheduling: ");
+        case FIFO:
+            printf("Running FIFO scheduling ");
+            currentRequest = requestBuffer[requestBuffer.rem];
+			requestBuffer.rem = (requestBuffer.rem+1) % BUF_SIZE;
+			requestBuffer.num--;
+            break;
+        case HPIC:
+            printf("Running HPIC scheduling:");
+            break;
+        case HPHC:
+           printf("Running HPHC scheduling: ");
+           break;
+        default:
+   		}
+   		*/
+		(void)close(currentRequest.listenfd);
+		web(currentRequest.socketfd, currentRequest.hit);
+	pthread_mutex_unlock(&m);
+	pthread_cond_signal (&c_prod);
+	printf("Consume value %d\n", 1);
+	}
+}
+
 int main(int argc, char **argv)
 {
-	int i, port, pid, listenfd, socketfd, hit;
-	socklen_t length;
-	static struct sockaddr_in cli_addr; /* static = initialised to zeros */
+	int i, port, pid, listenfd;
+
+	
 	static struct sockaddr_in serv_addr; /* static = initialised to zeros */
 
 		if( argc < 3  || argc > 3 || !strcmp(argv[1], "-?") ) {
@@ -243,98 +335,19 @@ int main(int argc, char **argv)
 	int pthread_attr_init(pthread_attr_t *attr); //TODO does this even make sense?
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 
-	//create buffer
-	struct Buffer requestBuffer;
+	//initialize buffer (already created globally)
 	requestBuffer.requests = (struct Request *) malloc(sizeof(struct Request) * BUF_SIZE);
 
 	//initializing producer thread, will take in reqeusts, package them, and place them on a queue
-	pthread_create(&prod, attr, producer, NULL);
-}
+	pthread_create(&prod, &attr, producer, NULL);
 
 	//initializning the pool of threads, NUM_THREADS will be command-line input
 	//attr was changed to make the threads detachable rather than joinable
 	for(j = 0; j < NUM_THREADS; i++){
-	pthread_create(&con_threads[j], attr, consumer,NULL);
-	}
-}
-
-void * producer(void * args){
-
-	for(hit=1; ;hit++) {
-		length = sizeof(cli_addr);
-		if((socketfd = accept(listenfd, (struct sockaddr *)&cli_addr, &length)) < 0)
-			logger(ERROR,"system call","accept",0);
-
-
-		pthread_mutex_lock(&m);
-			if(requestBuffer.num > BUF_SIZE){
-				exit(1);//buffer overflow
-			}
-			while(requestBuffer.num == BUF_SIZE) {
-				pthread_cond_wait(&c_prod, &m);
-			}
-			//critical section: create request object
-			request newRequest;
-			bzero(&newRequest, sizeof(newRequest));
-			newRequest->thread_id = requestBuffer.number_of_requests_dispatched;
-			newRequest->thread_count = 0;
-			newRequest->thread_html_count = 0;
-			newRequest->thread_image_count = 0;
-			newRequest->hit = hit;//the hit in the for loop (which may have to be reconfigured?)
-			newRequest->listenfd = listenfd;//from earlier in the code
-			newRequest->socketfd = socketfd;////from earlier in the code
-			//and add the reqeust object to the buffer
-			requestBuffer[requestBuffer.add] = newRequest;
-			requestBuffer.add = (requesBuffer.add +1) % BUF_SIZE;
-			requestBuffer.num++;
-
-		pthread_mutex_unlock(&m);
-		pthread_cond_signal(&c_cons);
-		print("producer inserted %d\n", reqdetail); fflush(stdout);
-
-		print("producer quiting\n"); fflush (stdout)
+	pthread_create(&con_threads[j], &attr, consumer,NULL);
 	}
 }
 
 
 
 
-void * consumer(void * args){
-	while(1){
-		pthread_mutex_lock(&m);
-		if(reqestBuffer.num < 0){
-			exit(1);//meaningless error messsage
-		}
-		while(requestBuffer.num == 0){
-			pthread_cond_wait (&c_cons, &m);
-		}
-		currentRequest = requestBuffer[requestBuffer.rem];
-		requestBuffer.rem = (requestBuffer.rem+1) % BUF_SIZE;
-		requestBuffer.num--;
-		/*
-		switch (mode) {
-
-        case ANY:
-            printf("Running ANY scheduling as FIFO scheduling: ");
-        case FIFO:
-            printf("Running FIFO scheduling ");
-            currentRequest = requestBuffer[requestBuffer.rem];
-			requestBuffer.rem = (requestBuffer.rem+1) % BUF_SIZE;
-			requestBuffer.num--;
-            break;
-        case HPIC:
-            printf("Running HPIC scheduling:");
-            break;
-        case HPHC:
-           printf("Running HPHC scheduling: ");
-           break;
-        default:
-   		}
-   		*/
-		(void)close(currentRequest.listenfd);
-		web(currentRequest.socketfd, currentRequest.hit);
-	pthread_mutex_unlock(&m);
-	pthread_cond_signal (&c_prod);
-	printf("Consume value %d\n", currentRequest-->name)
-	}
-}
