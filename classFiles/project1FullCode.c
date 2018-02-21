@@ -180,7 +180,7 @@ void web(int fd, int hit)
 	exit(1);
 }
 
-void * producer(int *listenfdAddress){
+void producer(int *listenfdAddress){
 	int hit, socketfd;
 	int listenfd = *listenfdAddress;
 	socklen_t length;
@@ -217,13 +217,13 @@ void * producer(int *listenfdAddress){
 
 		pthread_mutex_unlock(&m);
 		pthread_cond_signal(&c_cons);
-		print("producer inserted %d\n", newRequest); fflush(stdout);
+		//printf("producer inserted %d\n", newRequest); fflush(stdout);//TODO: not sure what you wanted with this code but its not properly formated so commented it out
 
-		print("producer quiting\n"); fflush (stdout);
+		printf("producer looping\n"); fflush (stdout);
 	}
 }
 
-void * consumer(void * args){
+void consumer(void * args){
 	struct Request currentRequest;
 	while(1){
 		pthread_mutex_lock(&m);
@@ -257,8 +257,8 @@ void * consumer(void * args){
    		}
    		*/
 		(void)close(currentRequest.listenfd);
-		web(currentRequest.socketfd, currentRequest.hit);
 	pthread_mutex_unlock(&m);
+	web(currentRequest.socketfd, currentRequest.hit);//TODO: this is a big mistake, the mutex will not be unlocked until web returns, So i switched it. it will not cause errors when multiple threads try to read this variable
 	pthread_cond_signal (&c_prod);
 	printf("Consume value %d\n", 1);
 	}
@@ -268,7 +268,7 @@ int main(int argc, char **argv)
 {
 	int i, port, pid, listenfd;
 
-	
+
 	static struct sockaddr_in serv_addr; /* static = initialised to zeros */
 
 		if( argc < 3  || argc > 3 || !strcmp(argv[1], "-?") ) {
@@ -347,7 +347,3 @@ int main(int argc, char **argv)
 	pthread_create(&con_threads[j], &attr, consumer,NULL);
 	}
 }
-
-
-
-
