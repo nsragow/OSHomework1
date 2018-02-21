@@ -180,9 +180,9 @@ void web(int fd, int hit)
 	exit(1);
 }
 
-void producer(int *listenfdAddress){
+void * producer(void *listenfdAddress){
 	int hit, socketfd;
-	int listenfd = *listenfdAddress;
+	int listenfd = *(int *)listenfdAddress;
 	socklen_t length;
 
 	static struct sockaddr_in cli_addr; /* static = initialised to zeros */
@@ -223,7 +223,7 @@ void producer(int *listenfdAddress){
 	}
 }
 
-void consumer(void * args){
+void * consumer(void * args){
 	struct Request currentRequest;
 	while(1){
 		pthread_mutex_lock(&m);
@@ -266,7 +266,7 @@ void consumer(void * args){
 
 int main(int argc, char **argv)
 {
-	int i, port, pid, listenfd;
+	int i, port, /*pid, TODO: commented out because it was not in use*/ listenfd;
 
 
 	static struct sockaddr_in serv_addr; /* static = initialised to zeros */
