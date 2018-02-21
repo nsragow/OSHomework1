@@ -200,6 +200,8 @@ int main(int argc, char **argv)
 		logger(ERROR,"system call","bind",0);
 	if( listen(listenfd,64) <0)
 		logger(ERROR,"system call","listen",0);
+
+
 	for(hit=1; ;hit++) {
 		length = sizeof(cli_addr);
 		if((socketfd = accept(listenfd, (struct sockaddr *)&cli_addr, &length)) < 0)

@@ -117,6 +117,13 @@ void web(int fd, int hit)
 	static char buffer[BUFSIZE+1]; /* static so zero filled */
 
 	ret =read(fd,buffer,BUFSIZE); 	/* read Web request in one go */
+	if(errno == EAGAIN){
+		logger(LOG,"dang","EAGAIN",0);
+	}
+	if(errno == EINTR){
+		logger(LOG,"dang","EIN",0);
+	}
+
 	if(ret == 0 || ret == -1) {	/* read failure stop now */
 		logger(FORBIDDEN,"failed to read browser request","",fd);
 	}
@@ -181,17 +188,20 @@ void web(int fd, int hit)
 }
 
 void * producer(void *listenfdAddress){
-	logger(LOG,"I am producer","accept",0);
+	logger(LOG,"producer","born",0);
 	int hit, socketfd;
-	logger(LOG,"producer","got here\n",0);
+
 	int listenfd = *(int *)listenfdAddress;//TODO thsi line must be causing an error
 	logger(LOG,"producer","did cast\n",0);
 	socklen_t length;
 
 	static struct sockaddr_in cli_addr; /* static = initialised to zeros */
 	logger(LOG,"producer","finished initializing\n",0);
+
+
 	for(hit=1; ;hit++) {
 		length = sizeof(cli_addr);
+		logger(LOG,"producer","about to do first accept",0);
 		if((socketfd = accept(listenfd, (struct sockaddr *)&cli_addr, &length)) < 0)
 			logger(ERROR,"system call","accept",0);
 
@@ -226,17 +236,17 @@ void * producer(void *listenfdAddress){
 		logger(LOG,"producer","mutex unlocked\n",0);
 		pthread_cond_signal(&c_cons);
 		//printf("producer inserted %d\n", newRequest); fflush(stdout);//TODO: not sure what you wanted with this code but its not properly formated so commented it out
-
+		//(void)close(socketfd);//TODO:needs to check for errors
 		logger(LOG,"producer looping\n","stuff",1);
 	}
 }
 
 void * consumer(void * args){
-	logger(LOG,"i am consumer","listen",0);
+	logger(LOG,"consumer","born",0);
 	struct Request currentRequest;
 	while(1){
 		pthread_mutex_lock(&m);
-		logger(LOG,"got past lock","listen",0);
+
 		if(requestBuffer.num < 0){
 			logger(LOG,"consumer","fatal error num less than sero\n",0);
 			exit(1);//meaningless error messsage
@@ -244,11 +254,11 @@ void * consumer(void * args){
 		while(requestBuffer.num == 0){
 			pthread_cond_wait (&c_cons, &m);
 		}
-		logger(LOG,"got past wait condition","listen",0);
+
 		currentRequest = requestBuffer.requests[requestBuffer.rem];
 		// requestBuffer.rem = (requestBuffer.rem+1) % BUF_SIZE;//TODO: are we sure these calculations are correct
 		requestBuffer.num--;
-		logger(LOG,"did calculations","listen",0);
+
 		/*
 		switch (mode) {
 
@@ -269,19 +279,19 @@ void * consumer(void * args){
         default:
    		}
    		*/
-		(void)close(currentRequest.listenfd);
+		//(void)close(currentRequest.listenfd);
 	pthread_mutex_unlock(&m);
 
-	logger(LOG,"unlocked","listen",0);
+	logger(LOG,"consumer","about to run web",0);
 	web(currentRequest.socketfd, currentRequest.hit);//TODO: this is a big mistake, the mutex will not be unlocked until web returns, So i switched it. it will not cause errors when multiple threads try to read this variable
 	pthread_cond_signal (&c_prod);
-	printf("Consume value %d\n", 1);
+
 	}
 }
 
 int main(int argc, char **argv)
 {
-	logger(LOG,"starting","",0);
+	logger(LOG,"main","starting",0);
 	int i, port, /*pid, TODO: commented out because it was not in use*/ listenfd;
 
 
