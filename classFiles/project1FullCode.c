@@ -181,13 +181,15 @@ void web(int fd, int hit)
 }
 
 void * producer(void *listenfdAddress){
-	logger(FORBIDDEN,"producer started","accept",0);
+	logger(LOG,"I am producer","accept",0);
 	int hit, socketfd;
-	int listenfd = *(int *)listenfdAddress;
+	logger(LOG,"producer","got here\n",0);
+	int listenfd = *(int *)listenfdAddress;//TODO thsi line must be causing an error
+	logger(LOG,"producer","did cast\n",0);
 	socklen_t length;
 
 	static struct sockaddr_in cli_addr; /* static = initialised to zeros */
-
+	logger(LOG,"producer","finished initializing\n",0);
 	for(hit=1; ;hit++) {
 		length = sizeof(cli_addr);
 		if((socketfd = accept(listenfd, (struct sockaddr *)&cli_addr, &length)) < 0)
@@ -195,12 +197,16 @@ void * producer(void *listenfdAddress){
 
 
 		pthread_mutex_lock(&m);
+		logger(LOG,"producer","got mutex lock\n",0);
 			if(requestBuffer.num > BUF_SIZE){
+				logger(LOG,"producer","fatal error num bigger than bufsize\n",0);
 				exit(1);//buffer overflow
 			}
 			while(requestBuffer.num == BUF_SIZE) {
+				logger(LOG,"producer","buf full, going to wait\n",0);
 				pthread_cond_wait(&c_prod, &m);
 			}
+			logger(LOG,"producer","have mutex after bufsizecheck\n",0);
 			//critical section: create request object
 			struct Request newRequest;
 			bzero(&newRequest, sizeof(newRequest));
@@ -217,26 +223,32 @@ void * producer(void *listenfdAddress){
 			requestBuffer.num++;
 
 		pthread_mutex_unlock(&m);
+		logger(LOG,"producer","mutex unlocked\n",0);
 		pthread_cond_signal(&c_cons);
 		//printf("producer inserted %d\n", newRequest); fflush(stdout);//TODO: not sure what you wanted with this code but its not properly formated so commented it out
 
-		logger(FORBIDDEN,"producer looping\n","stuff",1);
+		logger(LOG,"producer looping\n","stuff",1);
 	}
 }
 
 void * consumer(void * args){
+	logger(LOG,"i am consumer","listen",0);
 	struct Request currentRequest;
 	while(1){
 		pthread_mutex_lock(&m);
+		logger(LOG,"got past lock","listen",0);
 		if(requestBuffer.num < 0){
+			logger(LOG,"consumer","fatal error num less than sero\n",0);
 			exit(1);//meaningless error messsage
 		}
 		while(requestBuffer.num == 0){
 			pthread_cond_wait (&c_cons, &m);
 		}
+		logger(LOG,"got past wait condition","listen",0);
 		currentRequest = requestBuffer.requests[requestBuffer.rem];
-		requestBuffer.rem = (requestBuffer.rem+1) % BUF_SIZE;
+		// requestBuffer.rem = (requestBuffer.rem+1) % BUF_SIZE;//TODO: are we sure these calculations are correct
 		requestBuffer.num--;
+		logger(LOG,"did calculations","listen",0);
 		/*
 		switch (mode) {
 
@@ -259,6 +271,8 @@ void * consumer(void * args){
    		*/
 		(void)close(currentRequest.listenfd);
 	pthread_mutex_unlock(&m);
+
+	logger(LOG,"unlocked","listen",0);
 	web(currentRequest.socketfd, currentRequest.hit);//TODO: this is a big mistake, the mutex will not be unlocked until web returns, So i switched it. it will not cause errors when multiple threads try to read this variable
 	pthread_cond_signal (&c_prod);
 	printf("Consume value %d\n", 1);
@@ -267,6 +281,7 @@ void * consumer(void * args){
 
 int main(int argc, char **argv)
 {
+	logger(LOG,"starting","",0);
 	int i, port, /*pid, TODO: commented out because it was not in use*/ listenfd;
 
 
@@ -340,10 +355,12 @@ int main(int argc, char **argv)
 	requestBuffer.requests = (struct Request *) malloc(sizeof(struct Request) * BUF_SIZE);
 
 	//initializing producer thread, will take in reqeusts, package them, and place them on a queue
-	pthread_create(&prod, &attr, producer, NULL);
+	logger(LOG,"making producer","listen",0);
+	pthread_create(&prod, &attr, producer, &listenfd);
 
 	//initializning the pool of threads, NUM_THREADS will be command-line input
 	//attr was changed to make the threads detachable rather than joinable
+	logger(LOG,"making consumers","listen",0);
 	for(j = 0; j < NUM_THREADS; i++){
 	pthread_create(&con_threads[j], &attr, consumer,NULL);
 	}
