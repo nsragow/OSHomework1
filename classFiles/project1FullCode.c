@@ -30,6 +30,8 @@ pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t c_cons = PTHREAD_COND_INITIALIZER;
 pthread_cond_t c_prod = PTHREAD_COND_INITIALIZER;
 
+int mode;
+
 /*
 1) Struct to hold the jobs
 2) list of threads performing work
@@ -230,6 +232,28 @@ void * producer(void *listenfdAddress){
 			logger(LOG,"producer","have mutex after bufsizecheck\n",0);
 			//critical section: create request object
 			struct Request newRequest;
+			/*
+			//logic to determine if something is an image
+			static char buf[BUFSIZE+1]; 
+			long ret;
+			ret = read(socketfd,buf,BUFSIZE); 	
+			for(i=0;i<ret;i++){	
+				if(buffer[i] == '.'){
+					if( !strncmp(buffer,"gif",4) || !strncmp(buffer,"jpg",4) ||
+					    !strncmp(buffer,"jpeg",)5 || !strncmp(buffer,"png",4) ||
+					    !strncmp(buffer,"ico",)4 || !strncmp(buffer,"zip",4) ||
+					    !strncmp(buffer,"gz",)3 || !strncmp(buffer,"tar",4)) {
+						//item is an image
+						newRequest.type = IMAGE;
+					}
+					else if	(!strncmp(buffer,"htm",4) || !strncmp(buffer,"html",4){	
+						//item is text
+						newRequest.type = TEXT;
+					}
+	
+			}
+			*/
+			
 			bzero(&newRequest, sizeof(newRequest));
 			newRequest.thread_id = requestBuffer.number_of_requests_dispatched;
 			newRequest.thread_count = 0;
@@ -274,41 +298,65 @@ void * consumer(void * args){
 		switch (mode) {
 
         case ANY:
-            printf("Running ANY scheduling as FIFO scheduling: ");
+		printf("Running ANY scheduling as FIFO scheduling: ");
         case FIFO:
-            printf("Running FIFO scheduling ");
-            currentRequest = requestBuffer[requestBuffer.rem];
-			requestBuffer.rem = (requestBuffer.rem+1) % BUF_SIZE;
-			requestBuffer.num--;
+        	printf("Running FIFO scheduling ");
+        	currentRequest = requestBuffer[requestBuffer.rem];
+		requestBuffer.rem = (requestBuffer.rem+1) % BUF_SIZE;
+		requestBuffer.num--;
             break;
         case HPIC:
-            printf("Running HPIC scheduling:");
-            
-            		//logic to determine if something is an image
-			static char buf[BUFSIZE+1]; 
-			long ret;
-			ret =read(listenfd,buf,BUFSIZE); 	
-			for(i=0;i<ret;i++){	
-				if(buffer[i] == '.'){
-					if( !strncmp(buffer,"gif",4) || !strncmp(buffer,"jpg",4) ||
-					    !strncmp(buffer,"jpeg",)5 || !strncmp(buffer,"png",4) ||
-					    !strncmp(buffer,"ico",)4 || !strncmp(buffer,"zip",4) ||
-					    !strncmp(buffer,"gz",)3 || !strncmp(buffer,"tar",4)) {
-						//item is an image
-						newRequest.type = IMAGE;
-					}
-					else if	(!strncmp(buffer,"htm",4) || !strncmp(buffer,"html",4){	
-						//item is text
-						newRequest.type = TEXT;
-					}
-	
+		printf("Running HPIC scheduling:");
+		//check if its a an Image
+		int count;
+		int inCount;
+		currentRequest = requestBuffer[requestBuffer.rem];
+		struct Request tempRequest;
+		bool isImage = false;
+		for(count = 0; count < requestBuffer.num; count++){
+			tempRequest = requestBuffer[requestBuffer.rem + count]
+			if(tempRequest.type = IMAGE){
+				isImage = true;
+				currentRequest = tempRequest;//move the rest back one, decrease add spot and number, remove stays same
+				for(inCount = count; inCount < requestBuffer.num; inCount++){
+					requestBuffer[(requestBuffer.rem + inCount)  % BUF_SIZE] = requestBuffer[(requestBuffer.rem + inCount) % BUF_SIZE + 1];
+				}
+				requestBuffer.add--;
+				break;
 			}
-			
-			
+		}
+		if(!isImage){
+			requestBuffer.rem = (requestBuffer.rem+1) % BUF_SIZE;
+		}
+		requestBuffer.num--;				
 			
             break;
         case HPHC:
-           printf("Running HPHC scheduling: ");
+           printf("Running HPHC scheduling: ");	
+           	printf("Running HPIC scheduling:");
+		//check if its a an text
+		int count;
+		int inCount;
+		currentRequest = requestBuffer[requestBuffer.rem];
+		struct Request tempRequest;
+		bool isText = false;
+		for(count = 0; count < requestBuffer.num; count++){
+			tempRequest = requestBuffer[requestBuffer.rem + count]
+			if(tempRequest.type = TEXT){
+				isText = true;
+				currentRequest = tempRequest;//move the rest back one, decrease add spot and number, remove stays same
+				for(inCount = count; inCount < requestBuffer.num; inCount++){
+					requestBuffer[(requestBuffer.rem + inCount)  % BUF_SIZE] = requestBuffer[(requestBuffer.rem + inCount) % BUF_SIZE + 1];
+				}
+				requestBuffer.add--;
+				break;
+			}
+		}
+		if(!isText){
+			requestBuffer.rem = (requestBuffer.rem+1) % BUF_SIZE;
+		}
+		requestBuffer.num--;	
+           
            break;
         default:
    		}
@@ -358,8 +406,17 @@ int main(int argc, char **argv)
 		(void)printf("ERROR: Can't Change to directory %s\n",argv[2]);
 		exit(4);
 	}
+	
+	/*
+	if( !strncmp(argv[5],"FIFO"   ,5 ) || !strncmp(argv[5],"ANY", 4 ) ||
+	    !strncmp(argv[5],"HPIC",5 ) || !strncmp(argv[5],"HPHC", 5 ) ){
+		logger(ERROR, "main","illegal mode argument",0);
+		exit(3);
+	} 
+	mode = argv[5];
+	*/
 	/* Become deamon + unstopable and no zombies children (= no wait()) */
-
+	
 	if(fork() != 0)
 		return 0; /* parent returns OK to shell */
 	(void)signal(SIGCHLD, SIG_IGN); /* ignore child death */
