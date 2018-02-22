@@ -18,7 +18,7 @@
 #define NOTFOUND  404
 
 //Constants //TODO figure out how to really handle these values
-const int NUM_THREADS = 4;
+const int NUM_THREADS = 1;
 const int BUF_SIZE = 10;
 
 //intiating mutex and conditions from the start so that it could be shared by both the consumer and producer method
@@ -188,23 +188,30 @@ void web(int fd, int hit)
 }
 
 void * producer(void *listenfdAddress){
-	logger(LOG,"producer","born",0);
 	int hit, socketfd;
 
 	int listenfd = *(int *)listenfdAddress;//TODO thsi line must be causing an error
-	logger(LOG,"producer","did cast\n",0);
-	socklen_t length;
 
-	static struct sockaddr_in cli_addr; /* static = initialised to zeros */
-	logger(LOG,"producer","finished initializing\n",0);
+	socklen_t length;
+	logger(LOG,"producer","born",0);
+
+
 
 
 	for(hit=1; ;hit++) {
+		struct sockaddr_in cli_addr; /* static = initialised to zeros */
+		cli_addr.sin_family = 0;
+		cli_addr.sin_port = 0;
+		cli_addr.sin_addr.s_addr = 0;
+		for(int num = 0; num < 8; num ++){
+			cli_addr.sin_zero[num] = 0;
+		}
+
 		length = sizeof(cli_addr);
-		logger(LOG,"producer","about to do first accept",0);
+		logger(LOG,"producer","about to accept",0);
 		if((socketfd = accept(listenfd, (struct sockaddr *)&cli_addr, &length)) < 0)
 			logger(ERROR,"system call","accept",0);
-
+		logger(LOG,"producer","finished with accept on socket: ",socketfd);
 
 		pthread_mutex_lock(&m);
 		logger(LOG,"producer","got mutex lock\n",0);
@@ -256,8 +263,9 @@ void * consumer(void * args){
 		}
 
 		currentRequest = requestBuffer.requests[requestBuffer.rem];
-		// requestBuffer.rem = (requestBuffer.rem+1) % BUF_SIZE;//TODO: are we sure these calculations are correct
+		requestBuffer.rem = (requestBuffer.rem+1) % BUF_SIZE;
 		requestBuffer.num--;
+		pthread_mutex_unlock(&m);
 
 		/*
 		switch (mode) {
@@ -280,11 +288,11 @@ void * consumer(void * args){
    		}
    		*/
 		//(void)close(currentRequest.listenfd);
-	pthread_mutex_unlock(&m);
 
 	logger(LOG,"consumer","about to run web",0);
 	web(currentRequest.socketfd, currentRequest.hit);//TODO: this is a big mistake, the mutex will not be unlocked until web returns, So i switched it. it will not cause errors when multiple threads try to read this variable
 	pthread_cond_signal (&c_prod);
+	(void)close(currentRequest.socketfd);
 
 	}
 }
@@ -357,22 +365,23 @@ int main(int argc, char **argv)
 	pthread_t con_threads[NUM_THREADS];
 
 	//Change attribute default from joinable to detachable
-	pthread_attr_t attr;
+	/*pthread_attr_t attr;
 	int pthread_attr_init(pthread_attr_t *attr); //TODO does this even make sense?
-	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);*/
 
 	//initialize buffer (already created globally)
 	requestBuffer.requests = (struct Request *) malloc(sizeof(struct Request) * BUF_SIZE);
 
 	//initializing producer thread, will take in reqeusts, package them, and place them on a queue
-	logger(LOG,"making producer","listen",0);
-	pthread_create(&prod, &attr, producer, &listenfd);
-
+	logger(LOG,"main","making producer",0);
+	pthread_create(&prod, NULL, producer, &listenfd);
+  logger(LOG,"main","producer made",0);
 	//initializning the pool of threads, NUM_THREADS will be command-line input
 	//attr was changed to make the threads detachable rather than joinable
-	logger(LOG,"making consumers","listen",0);
-	for(j = 0; j < NUM_THREADS; i++){
-	pthread_create(&con_threads[j], &attr, consumer,NULL);
+	for(j = 0; j < NUM_THREADS; j++){
+		logger(LOG,"main","making consumer",0);
+		pthread_create(&(con_threads[j]), NULL, consumer,NULL);
 	}
-	//logger(ERROR,"gotd here","listen",0);
+	logger(LOG,"main","finished with consumers",0);
+	while(1){}
 }
