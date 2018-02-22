@@ -16,6 +16,9 @@
 #define LOG        44
 #define FORBIDDEN 403
 #define NOTFOUND  404
+#define TEXT        0
+#define IMAGE	    1
+
 
 //Constants //TODO figure out how to really handle these values
 const int NUM_THREADS = 1;
@@ -56,6 +59,7 @@ struct Request{
 	int hit;
 	int listenfd;
 	int socketfd;
+	int type;
 };
 
 struct Buffer{//TODO: make function to initilize this
@@ -266,8 +270,7 @@ void * consumer(void * args){
 		requestBuffer.rem = (requestBuffer.rem+1) % BUF_SIZE;
 		requestBuffer.num--;
 		pthread_mutex_unlock(&m);
-
-		/*
+ /*
 		switch (mode) {
 
         case ANY:
@@ -280,13 +283,36 @@ void * consumer(void * args){
             break;
         case HPIC:
             printf("Running HPIC scheduling:");
+            
+            		//logic to determine if something is an image
+			static char buf[BUFSIZE+1]; 
+			long ret;
+			ret =read(listenfd,buf,BUFSIZE); 	
+			for(i=0;i<ret;i++){	
+				if(buffer[i] == '.'){
+					if( !strncmp(buffer,"gif",4) || !strncmp(buffer,"jpg",4) ||
+					    !strncmp(buffer,"jpeg",)5 || !strncmp(buffer,"png",4) ||
+					    !strncmp(buffer,"ico",)4 || !strncmp(buffer,"zip",4) ||
+					    !strncmp(buffer,"gz",)3 || !strncmp(buffer,"tar",4)) {
+						//item is an image
+						newRequest.type = IMAGE;
+					}
+					else if	(!strncmp(buffer,"htm",4) || !strncmp(buffer,"html",4){	
+						//item is text
+						newRequest.type = TEXT;
+					}
+	
+			}
+			
+			
+			
             break;
         case HPHC:
            printf("Running HPHC scheduling: ");
            break;
         default:
    		}
-   		*/
+   */
 		//(void)close(currentRequest.listenfd);
 
 	logger(LOG,"consumer","about to run web",0);
