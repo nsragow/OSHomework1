@@ -122,11 +122,16 @@ void web(int fd, int hit)
 	long i, ret, len;
 	char * fstr;
 	static char buffer[BUFSIZE+1]; /* static so zero filled */
-	logger(LOG,"web","to read",0);
+	logger(LOG,"web","to read",fd);
+	logger(LOG,"this is what buffer looks like before",buffer,errno);
 	ret =read(fd,buffer,BUFSIZE); 	/* read Web request in one go */
 
-
+	logger(LOG,"this is what buffer looks like",buffer,errno);
 	if(ret == 0 || ret == -1) {	/* read failure stop now */
+		logger(LOG,"failed to read browser request","errno",errno);
+		logger(LOG,"failed to read browser request",buffer,errno);
+		logger(LOG,"failed to read browser request","fd",fd);
+		logger(LOG,"failed to read browser request","ret",ret);
 		logger(FORBIDDEN,"failed to read browser request","",fd);
 	}
 	if(ret > 0 && ret < BUFSIZE)	/* return code is valid chars */
@@ -174,6 +179,7 @@ void web(int fd, int hit)
 	logger(LOG,"Header",buffer,hit);
 	logger(LOG,"web","about to write",0);
 	dummy = write(fd,buffer,strlen(buffer));
+	logger(LOG,"web","finished first write",0);
 
     /* Send the statistical headers described in the paper, example below
 
@@ -182,9 +188,13 @@ void web(int fd, int hit)
     */
 
     /* send file in 8KB block - last block may be smaller */
+	logger(LOG,"web","about to loop write",0);
 	while (	(ret = read(file_fd, buffer, BUFSIZE)) > 0 ) {
+		logger(LOG,"web","writing to",fd);
 		dummy = write(fd,buffer,ret);
+		logger(LOG,"web","writing finito",fd);
 	}
+	logger(LOG,"web","finished loop write",0);
 	sleep(1);	/* allow socket to drain before signalling the socket is closed */
 
 
@@ -196,7 +206,7 @@ void * producer(void *listenfdAddress){
 	int listenfd = *(int *)listenfdAddress;//TODO thsi line must be causing an error
 
 	socklen_t length;
-	logger(LOG,"producer","born",0);
+	//logger(LOG,"producer","born",0);
 
 
 
@@ -206,19 +216,19 @@ void * producer(void *listenfdAddress){
 		cli_addr.sin_family = 0;
 		cli_addr.sin_port = 0;
 		cli_addr.sin_addr.s_addr = 0;
-		for(int num = 0; num < 8; num ++){
-			cli_addr.sin_zero[num] = 0;
+		for(int numb = 0; numb < 8; numb ++){
+			cli_addr.sin_zero[numb] = 0;
 		}
 
 		length = sizeof(cli_addr);
-		logger(LOG,"producer","about to accept",0);
+		//logger(LOG,"producer","about to accept",0);
 		if((socketfd = accept(listenfd, (struct sockaddr *)&cli_addr, &length)) < 0)
 			logger(ERROR,"system call","accept",0);
-		logger(LOG,"producer","finished with accept on socket",socketfd);
+		//logger(LOG,"producer","finished with accept on socket",socketfd);
 
 
 		pthread_mutex_lock(&m);
-		logger(LOG,"producer","got mutex lock\n",0);
+		//logger(LOG,"producer","got mutex lock\n",0);
 			if(requestBuffer.num > BUF_SIZE){
 				logger(LOG,"producer","fatal error num bigger than bufsize\n",0);
 				exit(1);//buffer overflow
@@ -227,7 +237,7 @@ void * producer(void *listenfdAddress){
 				logger(LOG,"producer","buf full, going to wait\n",0);
 				pthread_cond_wait(&c_prod, &m);
 			}
-			logger(LOG,"producer","have mutex after bufsizecheck\n",0);
+			//logger(LOG,"producer","have mutex after bufsizecheck\n",0);
 			//critical section: create request object
 			struct Request newRequest;
 			/*
@@ -264,21 +274,22 @@ void * producer(void *listenfdAddress){
 			requestBuffer.requests[requestBuffer.add] = newRequest;
 			requestBuffer.add = (requestBuffer.add +1) % BUF_SIZE;
 			requestBuffer.num++;
+			logger(LOG,"producer","num is",requestBuffer.num);
 
 		pthread_mutex_unlock(&m);
-		logger(LOG,"producer","mutex unlocked\n",0);
+		//logger(LOG,"producer","mutex unlocked\n",0);
 		pthread_cond_signal(&c_cons);
 		//printf("producer inserted %d\n", newRequest); fflush(stdout);//TODO: not sure what you wanted with this code but its not properly formated so commented it out
 		//(void)close(socketfd);//TODO:needs to check for errors
-		logger(LOG,"producer","looping",1);
+		//logger(LOG,"producer","looping",1);
 	}
 }
 
 void * consumer(void * args){
-	logger(LOG,"consumer","born",0);
+	//logger(LOG,"consumer","born",0);
 	struct Request currentRequest;
 	while(1){
-		logger(LOG,"consumer","starting loop",0);
+
 		pthread_mutex_lock(&m);
 
 		if(requestBuffer.num < 0){
@@ -286,12 +297,17 @@ void * consumer(void * args){
 			exit(1);//meaningless error messsage
 		}
 		while(requestBuffer.num == 0){
+			logger(LOG,"consumer","waiting",0);
 			pthread_cond_wait (&c_cons, &m);
+			logger(LOG,"consumer","left wait",0);
 		}
-
+		logger(LOG,"consumer","changing rem",requestBuffer.rem);
 		currentRequest = requestBuffer.requests[requestBuffer.rem];
 		requestBuffer.rem = (requestBuffer.rem+1) % BUF_SIZE;
 		requestBuffer.num--;
+		logger(LOG,"consumer","rem now is",requestBuffer.rem);
+		logger(LOG,"consumer","num now is",requestBuffer.num);
+		logger(LOG,"consumer","unlocking",0);
 		pthread_mutex_unlock(&m);
  /*
 		switch (mode) {
@@ -362,11 +378,11 @@ void * consumer(void * args){
    */
 		//(void)close(currentRequest.listenfd);
 
-	logger(LOG,"consumer","about to run web",0);
-	web(currentRequest.socketfd, currentRequest.hit);//TODO: this is a big mistake, the mutex will not be unlocked until web returns, So i switched it. it will not cause errors when multiple threads try to read this variable
+	logger(LOG,"consumer","about to run web with",currentRequest.socketfd);
+	web(currentRequest.socketfd, currentRequest.hit);
 	logger(LOG,"consumer","finished with web",0);
 	pthread_cond_signal (&c_prod);
-	logger(LOG,"consumer","about to close socket",0);
+	logger(LOG,"consumer","about to close socket",currentRequest.socketfd);
 	(void)close(currentRequest.socketfd);
 	logger(LOG,"consumer","looping",0);
 	}
@@ -457,15 +473,17 @@ int main(int argc, char **argv)
 	requestBuffer.requests = (struct Request *) malloc(sizeof(struct Request) * BUF_SIZE);
 
 	//initializing producer thread, will take in reqeusts, package them, and place them on a queue
-	logger(LOG,"main","making producer",0);
+
 	pthread_create(&prod, NULL, producer, &listenfd);
-  logger(LOG,"main","producer made",0);
+
 	//initializning the pool of threads, NUM_THREADS will be command-line input
 	//attr was changed to make the threads detachable rather than joinable
 	for(j = 0; j < NUM_THREADS; j++){
-		logger(LOG,"main","making consumer",0);
+
 		pthread_create(&(con_threads[j]), NULL, consumer,NULL);
 	}
-	logger(LOG,"main","finished with consumers",0);
-	while(1){}
+
+	//while(1){}
+	int returnOfMainThread = 1;
+	pthread_exit((void *)&returnOfMainThread);
 }
