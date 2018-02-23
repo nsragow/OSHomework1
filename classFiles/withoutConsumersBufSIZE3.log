@@ -1,0 +1,52 @@
+
+ INFO: main:starting:0
+ INFO: nweb starting:8219:16833
+ INFO: main:listenfd:0
+ INFO: main:making producer:0
+ INFO: main:producer made:0
+ INFO: producer:listenfd:0
+ INFO: producer:born:0
+ INFO: producer:test cli_addr:16
+ INFO: producer:about to accept:0
+ INFO: producer:finished with accept on socket: :1
+ INFO: producer:got mutex lock
+:0
+ INFO: producer:have mutex after bufsizecheck
+:0
+ INFO: producer:requestBuffer.add:1
+ INFO: producer:mutex unlocked
+:0
+ INFO: producer looping
+:stuff:1
+ INFO: producer:test cli_addr:16
+ INFO: producer:about to accept:0
+ INFO: producer:finished with accept on socket: :2
+ INFO: producer:got mutex lock
+:0
+ INFO: producer:have mutex after bufsizecheck
+:0
+ INFO: producer:requestBuffer.add:2
+ INFO: producer:mutex unlocked
+:0
+ INFO: producer looping
+:stuff:1
+ INFO: producer:test cli_addr:16
+ INFO: producer:about to accept:0
+ INFO: producer:finished with accept on socket: :3
+ INFO: producer:got mutex lock
+:0
+ INFO: producer:have mutex after bufsizecheck
+:0
+ INFO: producer:requestBuffer.add:0
+ INFO: producer:mutex unlocked
+:0
+ INFO: producer looping
+:stuff:1
+ INFO: producer:test cli_addr:16
+ INFO: producer:about to accept:0
+ INFO: producer:finished with accept on socket: :4
+ INFO: producer:got mutex lock
+:0
+ INFO: producer:buf full, going to wait
+:0
+
