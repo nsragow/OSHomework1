@@ -1,56 +1,27 @@
  INFO: main:starting:0
- INFO: nweb starting:8100:12359
+ INFO: nweb starting:8100:18553
  INFO: main:making producer:0
  INFO: main:producer made:0
- INFO: main:making consumer:0
- INFO: main:making consumer:0
- INFO: consumer:born:0
- INFO: main:making consumer:0
- INFO: main:making consumer:0
- INFO: consumer:born:0
- INFO: main:finished with consumers:0 INFO: consumer:born:0
-
- INFO: main:starting:0
- INFO: nweb starting:8100:12382
- INFO: main:making producer:0
- INFO: main:producer made:0
- INFO: main:making consumer:0
- INFO: main:making consumer:0
- INFO: main:making consumer:0 INFO: consumer:born:0
-
  INFO: main:making consumer:0
  INFO: main:finished with consumers:0
- INFO: main:starting:0
- INFO: nweb starting:8100:12430
- INFO: main:making producer:0
- INFO: main:producer made:0 INFO: producer:born:0
-
- INFO: main:making consumer:0 INFO: producer:did cast
-:0
-
- INFO: producer:finished initializing
-:0
+ INFO: consumer:born:0
+ INFO: consumer:starting loop:0
+ INFO: producer:born:0
  INFO: producer:about to accept:0
- INFO: main:making consumer:0
- INFO: main:making consumer:0
- INFO: main:making consumer:0
- INFO: main:finished with consumers:0 INFO: consumer:born:0
-
- INFO: consumer:born:0
- INFO: consumer:born:0
- INFO: consumer:born:0
- INFO: producer:finished with accept:0
+ INFO: producer:finished with accept on socket:1
  INFO: producer:got mutex lock
 :0
  INFO: producer:have mutex after bufsizecheck
 :0
  INFO: producer:mutex unlocked
 :0
- INFO: producer looping
-:stuff:1
- INFO: consumer:about to run web:0 INFO: producer:about to accept:0
+ INFO: producer:looping:1 INFO: consumer:about to run web:0
+ INFO: web:fd:1
+ INFO: web:to read:0
 
+ INFO: producer:about to accept:0
  INFO: request:GET /nigel.jpg HTTP/1.1**Host: localhost:8100**Connection: keep-alive**Cache-Control: max-age=0**Upgrade-Insecure-Requests: 1**User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/64.0.3282.167 Chrome/64.0.3282.167 Safari/537.36**Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8**Accept-Encoding: gzip, deflate, br**Accept-Language: en-US,en;q=0.9****:1
+ INFO: web:about to open:0
  INFO: SEND:nigel.jpg:1
  INFO: Header:HTTP/1.1 200 OK
 Server: nweb/23.0
@@ -59,129 +30,567 @@ Connection: close
 Content-Type: image/jpg
 
 :1
- INFO: producer:finished with accept:0
+ INFO: web:about to write:0
+ INFO: producer:finished with accept on socket:2
  INFO: producer:got mutex lock
 :0
  INFO: producer:have mutex after bufsizecheck
 :0
  INFO: producer:mutex unlocked
 :0
- INFO: producer looping
-:stuff:1
+ INFO: producer:looping:1
+ INFO: producer:about to accept:0
+ INFO: consumer:finished with web:0
+ INFO: consumer:about to close socket:0
+ INFO: consumer:looping:0
+ INFO: consumer:starting loop:0
+ INFO: consumer:about to run web:0
+ INFO: web:fd:2
+ INFO: web:to read:0
+ INFO: request:GET /nigel.jpg HTTP/1.1**Host: localhost:8100**Connection: keep-alive**Cache-Control: max-age=0**Upgrade-Insecure-Requests: 1**User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/64.0.3282.167 Chrome/64.0.3282.167 Safari/537.36**Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8**Accept-Encoding: gzip, deflate, br**Accept-Language: en-US,en;q=0.9****:2
+ INFO: web:about to open:0
+ INFO: SEND:nigel.jpg:2
+ INFO: Header:HTTP/1.1 200 OK
+Server: nweb/23.0
+Content-Length: 10184
+Connection: close
+Content-Type: image/jpg
+
+:2
+ INFO: web:about to write:0
+ INFO: producer:finished with accept on socket:4
+ INFO: producer:got mutex lock
+:0
+ INFO: producer:have mutex after bufsizecheck
+:0
+ INFO: producer:mutex unlocked
+:0
+ INFO: producer:looping:1
+ INFO: producer:about to accept:0
+ INFO: consumer:finished with web:0
+ INFO: consumer:about to close socket:0
+ INFO: consumer:looping:0
+ INFO: consumer:starting loop:0
+ INFO: consumer:about to run web:0
+ INFO: web:fd:4
+ INFO: web:to read:0
+ INFO: request:GET /nigel.jpg HTTP/1.1**Host: localhost:8100**Connection: keep-alive**Cache-Control: max-age=0**Upgrade-Insecure-Requests: 1**User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/64.0.3282.167 Chrome/64.0.3282.167 Safari/537.36**Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8**Accept-Encoding: gzip, deflate, br**Accept-Language: en-US,en;q=0.9****:3
+ INFO: web:about to open:0
+ INFO: SEND:nigel.jpg:3
+ INFO: Header:HTTP/1.1 200 OK
+Server: nweb/23.0
+Content-Length: 10184
+Connection: close
+Content-Type: image/jpg
+
+:3
+ INFO: web:about to write:0
+ INFO: producer:finished with accept on socket:5
+ INFO: producer:got mutex lock
+:0
+ INFO: producer:have mutex after bufsizecheck
+:0
+ INFO: producer:mutex unlocked
+:0
+ INFO: producer:looping:1
+ INFO: producer:about to accept:0
+ INFO: producer:finished with accept on socket:6
+ INFO: producer:got mutex lock
+:0
+ INFO: producer:have mutex after bufsizecheck
+:0
+ INFO: producer:mutex unlocked
+:0
+ INFO: producer:looping:1
+ INFO: producer:about to accept:0
+ INFO: consumer:finished with web:0
+ INFO: consumer:about to close socket:0
+ INFO: consumer:looping:0
+ INFO: consumer:starting loop:0
+ INFO: consumer:about to run web:0
+ INFO: web:fd:5
+ INFO: web:to read:0
+ INFO: request:GET /nigel.jpg HTTP/1.1**Host: localhost:8100**Connection: keep-alive**Cache-Control: max-age=0**Upgrade-Insecure-Requests: 1**User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/64.0.3282.167 Chrome/64.0.3282.167 Safari/537.36**Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8**Accept-Encoding: gzip, deflate, br**Accept-Language: en-US,en;q=0.9****:4
+ INFO: web:about to open:0
+ INFO: SEND:nigel.jpg:4
+ INFO: Header:HTTP/1.1 200 OK
+Server: nweb/23.0
+Content-Length: 10184
+Connection: close
+Content-Type: image/jpg
+
+:4
+ INFO: web:about to write:0
+ INFO: producer:finished with accept on socket:7
+ INFO: producer:got mutex lock
+:0
+ INFO: producer:have mutex after bufsizecheck
+:0
+ INFO: producer:mutex unlocked
+:0
+ INFO: producer:looping:1
+ INFO: producer:about to accept:0
+ INFO: consumer:finished with web:0
+ INFO: consumer:about to close socket:0
+ INFO: consumer:looping:0
+ INFO: consumer:starting loop:0
+ INFO: consumer:about to run web:0
+ INFO: web:fd:6
+ INFO: web:to read:0
+ INFO: request:GET /nigel.jpg HTTP/1.1**Host: localhost:8100**Connection: keep-alive**Cache-Control: max-age=0**Upgrade-Insecure-Requests: 1**User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/64.0.3282.167 Chrome/64.0.3282.167 Safari/537.36**Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8**Accept-Encoding: gzip, deflate, br**Accept-Language: en-US,en;q=0.9****:5
+ INFO: web:about to open:0
+ INFO: SEND:nigel.jpg:5
+ INFO: Header:HTTP/1.1 200 OK
+Server: nweb/23.0
+Content-Length: 10184
+Connection: close
+Content-Type: image/jpg
+
+:5
+ INFO: web:about to write:0
+ INFO: producer:finished with accept on socket:8
+ INFO: producer:got mutex lock
+:0
+ INFO: producer:have mutex after bufsizecheck
+:0
+ INFO: producer:mutex unlocked
+:0
+ INFO: producer:looping:1
+ INFO: producer:about to accept:0
+ INFO: producer:finished with accept on socket:9
+ INFO: producer:got mutex lock
+:0
+ INFO: producer:have mutex after bufsizecheck
+:0
+ INFO: producer:mutex unlocked
+:0
+ INFO: producer:looping:1
+ INFO: producer:about to accept:0
+ INFO: consumer:finished with web:0
+ INFO: consumer:about to close socket:0
+ INFO: consumer:looping:0
+ INFO: consumer:starting loop:0
+ INFO: consumer:about to run web:0
+ INFO: web:fd:7
+ INFO: web:to read:0
+ INFO: request:GET /nigel.jpg HTTP/1.1**Host: localhost:8100**Connection: keep-alive**Cache-Control: max-age=0**Upgrade-Insecure-Requests: 1**User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/64.0.3282.167 Chrome/64.0.3282.167 Safari/537.36**Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8**Accept-Encoding: gzip, deflate, br**Accept-Language: en-US,en;q=0.9****:6
+ INFO: web:about to open:0
+ INFO: SEND:nigel.jpg:6
+ INFO: Header:HTTP/1.1 200 OK
+Server: nweb/23.0
+Content-Length: 10184
+Connection: close
+Content-Type: image/jpg
+
+:6
+ INFO: web:about to write:0
+ INFO: main:starting:0
+ INFO: nweb starting:8100:18613
+ INFO: main:making producer:0
+ INFO: main:producer made:0
+ INFO: producer:born:0 INFO: main:making consumer:0
+
+ INFO: producer:about to accept:0
+ INFO: main:finished with consumers:0
+ INFO: consumer:born:0
+ INFO: consumer:starting loop:0
+ INFO: producer:finished with accept on socket:1
+ INFO: producer:got mutex lock
+:0
+ INFO: producer:have mutex after bufsizecheck
+:0
+ INFO: producer:mutex unlocked
+:0
+ INFO: producer:looping:1
  INFO: producer:about to accept:0
  INFO: consumer:about to run web:0
+ INFO: web:fd:1
+ INFO: web:to read:0
+ INFO: producer:finished with accept on socket:2
+ INFO: producer:got mutex lock
+:0
+ INFO: producer:have mutex after bufsizecheck
+:0
+ INFO: producer:mutex unlocked
+:0
+ INFO: producer:looping:1
+ INFO: producer:about to accept:0
+ INFO: request:GET /nigel.jpg HTTP/1.1**Host: localhost:8100**Connection: keep-alive**Cache-Control: max-age=0**Upgrade-Insecure-Requests: 1**User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/64.0.3282.167 Chrome/64.0.3282.167 Safari/537.36**Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8**Accept-Encoding: gzip, deflate, br**Accept-Language: en-US,en;q=0.9****:1
+ INFO: web:about to open:0
+ INFO: SEND:nigel.jpg:1
+ INFO: Header:HTTP/1.1 200 OK
+Server: nweb/23.0
+Content-Length: 10184
+Connection: close
+Content-Type: image/jpg
+
+:1
+ INFO: web:about to write:0
+ INFO: consumer:finished with web:0
+ INFO: consumer:about to close socket:0
+ INFO: consumer:looping:0
+ INFO: consumer:starting loop:0
+ INFO: consumer:about to run web:0
+ INFO: web:fd:2
+ INFO: web:to read:0
+ INFO: producer:finished with accept on socket:3
+ INFO: producer:got mutex lock
+:0
+ INFO: producer:have mutex after bufsizecheck
+:0
+ INFO: producer:mutex unlocked
+:0
+ INFO: producer:looping:1
+ INFO: producer:about to accept:0
+ INFO: request:GET /nigel.jpg HTTP/1.1**Host: localhost:8100**Connection: keep-alive**Cache-Control: max-age=0**Upgrade-Insecure-Requests: 1**User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/64.0.3282.167 Chrome/64.0.3282.167 Safari/537.36**Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8**Accept-Encoding: gzip, deflate, br**Accept-Language: en-US,en;q=0.9****:2
+ INFO: web:about to open:0
+ INFO: SEND:nigel.jpg:2
+ INFO: Header:HTTP/1.1 200 OK
+Server: nweb/23.0
+Content-Length: 10184
+Connection: close
+Content-Type: image/jpg
+
+:2
+ INFO: web:about to write:0
+ INFO: consumer:finished with web:0
+ INFO: consumer:about to close socket:0
+ INFO: consumer:looping:0
+ INFO: consumer:starting loop:0
+ INFO: consumer:about to run web:0
+ INFO: web:fd:3
+ INFO: web:to read:0
+ INFO: producer:finished with accept on socket:1
+ INFO: producer:got mutex lock
+:0
+ INFO: producer:have mutex after bufsizecheck
+:0
+ INFO: producer:mutex unlocked
+:0
+ INFO: producer:looping:1
+ INFO: producer:about to accept:0
+ INFO: request:GET /nigel.jpg HTTP/1.1**Host: localhost:8100**Connection: keep-alive**Cache-Control: max-age=0**Upgrade-Insecure-Requests: 1**User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/64.0.3282.167 Chrome/64.0.3282.167 Safari/537.36**Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8**Accept-Encoding: gzip, deflate, br**Accept-Language: en-US,en;q=0.9****:3
+ INFO: web:about to open:0
+ INFO: SEND:nigel.jpg:3
+ INFO: Header:HTTP/1.1 200 OK
+Server: nweb/23.0
+Content-Length: 10184
+Connection: close
+Content-Type: image/jpg
+
+:3
+ INFO: web:about to write:0
+ INFO: consumer:finished with web:0
+ INFO: consumer:about to close socket:0
+ INFO: consumer:looping:0
+ INFO: consumer:starting loop:0
+ INFO: consumer:about to run web:0
+ INFO: web:fd:1
+ INFO: web:to read:0
+ INFO: producer:finished with accept on socket:2
+ INFO: producer:got mutex lock
+:0
+ INFO: producer:have mutex after bufsizecheck
+:0
+ INFO: producer:mutex unlocked
+:0
+ INFO: producer:looping:1
+ INFO: producer:about to accept:0
+ INFO: request:GET /nigel.jpg HTTP/1.1**Host: localhost:8100**Connection: keep-alive**Cache-Control: max-age=0**Upgrade-Insecure-Requests: 1**User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/64.0.3282.167 Chrome/64.0.3282.167 Safari/537.36**Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8**Accept-Encoding: gzip, deflate, br**Accept-Language: en-US,en;q=0.9****:4
+ INFO: web:about to open:0
+ INFO: SEND:nigel.jpg:4
+ INFO: Header:HTTP/1.1 200 OK
+Server: nweb/23.0
+Content-Length: 10184
+Connection: close
+Content-Type: image/jpg
+
+:4
+ INFO: web:about to write:0
+ INFO: consumer:finished with web:0
+ INFO: consumer:about to close socket:0
+ INFO: consumer:looping:0
+ INFO: consumer:starting loop:0
+ INFO: consumer:about to run web:0
+ INFO: web:fd:2
+ INFO: web:to read:0
+ INFO: producer:finished with accept on socket:3
+ INFO: producer:got mutex lock
+:0
+ INFO: producer:have mutex after bufsizecheck
+:0
+ INFO: producer:mutex unlocked
+:0
+ INFO: producer:looping:1
+ INFO: producer:about to accept:0
+ INFO: request:GET /nigel.jpg HTTP/1.1**Host: localhost:8100**Connection: keep-alive**Cache-Control: max-age=0**Upgrade-Insecure-Requests: 1**User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/64.0.3282.167 Chrome/64.0.3282.167 Safari/537.36**Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8**Accept-Encoding: gzip, deflate, br**Accept-Language: en-US,en;q=0.9****:5
+ INFO: web:about to open:0
+ INFO: SEND:nigel.jpg:5
+ INFO: Header:HTTP/1.1 200 OK
+Server: nweb/23.0
+Content-Length: 10184
+Connection: close
+Content-Type: image/jpg
+
+:5
+ INFO: web:about to write:0
+ INFO: consumer:finished with web:0
+ INFO: consumer:about to close socket:0
+ INFO: consumer:looping:0
+ INFO: consumer:starting loop:0
+ INFO: consumer:about to run web:0
+ INFO: web:fd:3
+ INFO: web:to read:0
+ INFO: producer:finished with accept on socket:1
+ INFO: producer:got mutex lock
+:0
+ INFO: producer:have mutex after bufsizecheck
+:0
+ INFO: producer:mutex unlocked
+:0
+ INFO: producer:looping:1
+ INFO: producer:about to accept:0
+ INFO: request:GET /nigel.jpg HTTP/1.1**Host: localhost:8100**Connection: keep-alive**Cache-Control: max-age=0**Upgrade-Insecure-Requests: 1**User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/64.0.3282.167 Chrome/64.0.3282.167 Safari/537.36**Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8**Accept-Encoding: gzip, deflate, br**Accept-Language: en-US,en;q=0.9****:6
+ INFO: web:about to open:0
+ INFO: SEND:nigel.jpg:6
+ INFO: Header:HTTP/1.1 200 OK
+Server: nweb/23.0
+Content-Length: 10184
+Connection: close
+Content-Type: image/jpg
+
+:6
+ INFO: web:about to write:0
+ INFO: consumer:finished with web:0
+ INFO: consumer:about to close socket:0
+ INFO: consumer:looping:0
+ INFO: consumer:starting loop:0
+ INFO: consumer:about to run web:0
+ INFO: web:fd:1
+ INFO: web:to read:0
+ INFO: producer:finished with accept on socket:2
+ INFO: producer:got mutex lock
+:0
+ INFO: producer:have mutex after bufsizecheck
+:0
+ INFO: producer:mutex unlocked
+:0
+ INFO: producer:looping:1
+ INFO: producer:about to accept:0
+ INFO: request:GET /nigel.jpg HTTP/1.1**Host: localhost:8100**Connection: keep-alive**Cache-Control: max-age=0**Upgrade-Insecure-Requests: 1**User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/64.0.3282.167 Chrome/64.0.3282.167 Safari/537.36**Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8**Accept-Encoding: gzip, deflate, br**Accept-Language: en-US,en;q=0.9****:7
+ INFO: web:about to open:0
+ INFO: SEND:nigel.jpg:7
+ INFO: Header:HTTP/1.1 200 OK
+Server: nweb/23.0
+Content-Length: 10184
+Connection: close
+Content-Type: image/jpg
+
+:7
+ INFO: web:about to write:0
+ INFO: consumer:finished with web:0
+ INFO: consumer:about to close socket:0
+ INFO: consumer:looping:0
+ INFO: consumer:starting loop:0
+ INFO: consumer:about to run web:0
+ INFO: web:fd:2
+ INFO: web:to read:0
+ INFO: producer:finished with accept on socket:3
+ INFO: producer:got mutex lock
+:0
+ INFO: producer:have mutex after bufsizecheck
+:0
+ INFO: producer:mutex unlocked
+:0
+ INFO: producer:looping:1
+ INFO: producer:about to accept:0
+ INFO: request:GET /nigel.jpg HTTP/1.1**Host: localhost:8100**Connection: keep-alive**Cache-Control: max-age=0**Upgrade-Insecure-Requests: 1**User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/64.0.3282.167 Chrome/64.0.3282.167 Safari/537.36**Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8**Accept-Encoding: gzip, deflate, br**Accept-Language: en-US,en;q=0.9****:8
+ INFO: web:about to open:0
+ INFO: SEND:nigel.jpg:8
+ INFO: Header:HTTP/1.1 200 OK
+Server: nweb/23.0
+Content-Length: 10184
+Connection: close
+Content-Type: image/jpg
+
+:8
+ INFO: web:about to write:0
+ INFO: consumer:finished with web:0
+ INFO: consumer:about to close socket:0
+ INFO: consumer:looping:0
+ INFO: consumer:starting loop:0
+ INFO: consumer:about to run web:0
+ INFO: web:fd:3
+ INFO: web:to read:0
+ INFO: producer:finished with accept on socket:1
+ INFO: producer:got mutex lock
+:0
+ INFO: producer:have mutex after bufsizecheck
+:0
+ INFO: producer:mutex unlocked
+:0
+ INFO: producer:looping:1
+ INFO: producer:about to accept:0
+ INFO: request:GET /nigel.jpg HTTP/1.1**Host: localhost:8100**Connection: keep-alive**Cache-Control: max-age=0**Upgrade-Insecure-Requests: 1**User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/64.0.3282.167 Chrome/64.0.3282.167 Safari/537.36**Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8**Accept-Encoding: gzip, deflate, br**Accept-Language: en-US,en;q=0.9****:9
+ INFO: web:about to open:0
+ INFO: SEND:nigel.jpg:9
+ INFO: Header:HTTP/1.1 200 OK
+Server: nweb/23.0
+Content-Length: 10184
+Connection: close
+Content-Type: image/jpg
+
+:9
+ INFO: web:about to write:0
+ INFO: consumer:finished with web:0
+ INFO: consumer:about to close socket:0
+ INFO: consumer:looping:0
+ INFO: consumer:starting loop:0
+ INFO: consumer:about to run web:0
+ INFO: web:fd:1
+ INFO: web:to read:0
+ INFO: producer:finished with accept on socket:2
+ INFO: producer:got mutex lock
+:0
+ INFO: producer:have mutex after bufsizecheck
+:0
+ INFO: producer:mutex unlocked
+:0
+ INFO: producer:looping:1
+ INFO: producer:about to accept:0
+ INFO: request:GET /nigel.jpg HTTP/1.1**Host: localhost:8100**Connection: keep-alive**Cache-Control: max-age=0**Upgrade-Insecure-Requests: 1**User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/64.0.3282.167 Chrome/64.0.3282.167 Safari/537.36**Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8**Accept-Encoding: gzip, deflate, br**Accept-Language: en-US,en;q=0.9****:10
+ INFO: web:about to open:0
+ INFO: SEND:nigel.jpg:10
+ INFO: Header:HTTP/1.1 200 OK
+Server: nweb/23.0
+Content-Length: 10184
+Connection: close
+Content-Type: image/jpg
+
+:10
+ INFO: web:about to write:0
+ INFO: consumer:finished with web:0
+ INFO: consumer:about to close socket:0
+ INFO: consumer:looping:0
+ INFO: consumer:starting loop:0
+ INFO: consumer:about to run web:0
+ INFO: web:fd:2
+ INFO: web:to read:0
+ INFO: producer:finished with accept on socket:3
+ INFO: producer:got mutex lock
+:0
+ INFO: producer:have mutex after bufsizecheck
+:0
+ INFO: producer:mutex unlocked
+:0
+ INFO: producer:looping:1
+ INFO: producer:about to accept:0
+ INFO: request:GET /nigel.jpg HTTP/1.1**Host: localhost:8100**Connection: keep-alive**Cache-Control: max-age=0**Upgrade-Insecure-Requests: 1**User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/64.0.3282.167 Chrome/64.0.3282.167 Safari/537.36**Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8**Accept-Encoding: gzip, deflate, br**Accept-Language: en-US,en;q=0.9****:11
+ INFO: web:about to open:0
+ INFO: SEND:nigel.jpg:11
+ INFO: Header:HTTP/1.1 200 OK
+Server: nweb/23.0
+Content-Length: 10184
+Connection: close
+Content-Type: image/jpg
+
+:11
+ INFO: web:about to write:0
+ INFO: consumer:finished with web:0
+ INFO: consumer:about to close socket:0
+ INFO: consumer:looping:0
+ INFO: consumer:starting loop:0
+ INFO: consumer:about to run web:0
+ INFO: web:fd:3
+ INFO: web:to read:0
+ INFO: producer:finished with accept on socket:1
+ INFO: producer:got mutex lock
+:0
+ INFO: producer:have mutex after bufsizecheck
+:0
+ INFO: producer:mutex unlocked
+:0
+ INFO: producer:looping:1
+ INFO: producer:about to accept:0
+ INFO: request:GET /nigel.jpg HTTP/1.1**Host: localhost:8100**Connection: keep-alive**Cache-Control: max-age=0**Upgrade-Insecure-Requests: 1**User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/64.0.3282.167 Chrome/64.0.3282.167 Safari/537.36**Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8**Accept-Encoding: gzip, deflate, br**Accept-Language: en-US,en;q=0.9****:12
+ INFO: web:about to open:0
+ INFO: SEND:nigel.jpg:12
+ INFO: Header:HTTP/1.1 200 OK
+Server: nweb/23.0
+Content-Length: 10184
+Connection: close
+Content-Type: image/jpg
+
+:12
+ INFO: web:about to write:0
+ INFO: consumer:finished with web:0
+ INFO: consumer:about to close socket:0
+ INFO: consumer:looping:0
+ INFO: consumer:starting loop:0
+ INFO: consumer:about to run web:0
+ INFO: web:fd:1
+ INFO: web:to read:0
+ INFO: producer:finished with accept on socket:2
+ INFO: producer:got mutex lock
+:0
+ INFO: producer:have mutex after bufsizecheck
+:0
+ INFO: producer:mutex unlocked
+:0
+ INFO: producer:looping:1
+ INFO: producer:about to accept:0
+ INFO: request:GET /nigel.jpg HTTP/1.1**Host: localhost:8100**Connection: keep-alive**Cache-Control: max-age=0**Upgrade-Insecure-Requests: 1**User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/64.0.3282.167 Chrome/64.0.3282.167 Safari/537.36**Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8**Accept-Encoding: gzip, deflate, br**Accept-Language: en-US,en;q=0.9****:13
+ INFO: web:about to open:0
+ INFO: SEND:nigel.jpg:13
+ INFO: Header:HTTP/1.1 200 OK
+Server: nweb/23.0
+Content-Length: 10184
+Connection: close
+Content-Type: image/jpg
+
+:13
+ INFO: web:about to write:0
+ INFO: consumer:finished with web:0
+ INFO: consumer:about to close socket:0
+ INFO: consumer:looping:0
+ INFO: consumer:starting loop:0
+ INFO: consumer:about to run web:0
+ INFO: web:fd:2
+ INFO: web:to read:0
 FORBIDDEN: failed to read browser request:
  INFO: main:starting:0
- INFO: nweb starting:8100:12519
- INFO: main:making producer:0
- INFO: main:producer made:0
- INFO: producer:born:0
- INFO: main:making consumer:0
- INFO: producer:did cast
-:0
- INFO: producer:finished initializing
-:0
- INFO: main:finished with consumers:0 INFO: producer:about to accept:0
-
- INFO: consumer:born:0
- INFO: producer:finished with accept:0
- INFO: producer:got mutex lock
-:0
- INFO: producer:have mutex after bufsizecheck
-:0
- INFO: producer:mutex unlocked
-:0
- INFO: producer looping
-:stuff:1
- INFO: producer:about to accept:0
- INFO: consumer:about to run web:0
- INFO: request:GET /nigel.jpg HTTP/1.1**Host: localhost:8100**Connection: keep-alive**Cache-Control: max-age=0**Upgrade-Insecure-Requests: 1**User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/64.0.3282.167 Chrome/64.0.3282.167 Safari/537.36**Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8**Accept-Encoding: gzip, deflate, br**Accept-Language: en-US,en;q=0.9****:1
- INFO: SEND:nigel.jpg:1
- INFO: Header:HTTP/1.1 200 OK
-Server: nweb/23.0
-Content-Length: 10184
-Connection: close
-Content-Type: image/jpg
-
-:1
- INFO: producer:finished with accept:0
- INFO: producer:got mutex lock
-:0
- INFO: producer:have mutex after bufsizecheck
-:0
- INFO: producer:mutex unlocked
-:0
- INFO: producer looping
-:stuff:1
- INFO: producer:about to accept:0
- INFO: main:starting:0
- INFO: nweb starting:8100:12879
+ INFO: nweb starting:8100:18656
  INFO: main:making producer:0
  INFO: main:producer made:0
  INFO: main:making consumer:0
  INFO: main:finished with consumers:0
- INFO: producer:born:0
- INFO: producer:did cast
-:0
- INFO: producer:finished initializing
-:0
- INFO: producer:about to accept:0
  INFO: consumer:born:0
- INFO: producer:finished with accept:0
- INFO: producer:got mutex lock
-:0
- INFO: producer:have mutex after bufsizecheck
-:0
- INFO: producer:mutex unlocked
-:0
- INFO: producer looping
-:stuff:1 INFO: consumer:about to run web:0
-
- INFO: producer:about to accept:0
- INFO: request:GET /nigel.jpg HTTP/1.1**Host: localhost:8100**Connection: keep-alive**Cache-Control: max-age=0**Upgrade-Insecure-Requests: 1**User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/64.0.3282.167 Chrome/64.0.3282.167 Safari/537.36**Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8**Accept-Encoding: gzip, deflate, br**Accept-Language: en-US,en;q=0.9****:1
- INFO: SEND:nigel.jpg:1
- INFO: Header:HTTP/1.1 200 OK
-Server: nweb/23.0
-Content-Length: 10184
-Connection: close
-Content-Type: image/jpg
-
-:1
- INFO: producer:finished with accept:0
- INFO: producer:got mutex lock
-:0
- INFO: producer:have mutex after bufsizecheck
-:0
- INFO: producer:mutex unlocked
-:0
- INFO: producer looping
-:stuff:1
- INFO: producer:about to accept:0
- INFO: main:starting:0
- INFO: nweb starting:8100:13771
- INFO: main:making producer:0
- INFO: main:producer made:0
- INFO: main:making consumer:0
+ INFO: consumer:starting loop:0
  INFO: producer:born:0
- INFO: producer:did cast
-:0
- INFO: producer:finished initializing
-:0
  INFO: producer:about to accept:0
- INFO: main:finished with consumers:0 INFO: consumer:born:0
-
- INFO: producer:finished with accept:0
+ INFO: producer:finished with accept on socket:1
  INFO: producer:got mutex lock
 :0
  INFO: producer:have mutex after bufsizecheck
 :0
  INFO: producer:mutex unlocked
 :0
- INFO: producer looping
-:stuff:1
- INFO: producer:about to accept:0
  INFO: consumer:about to run web:0
+ INFO: web:fd:1
+ INFO: web:to read:0
+ INFO: producer:looping:1
+ INFO: producer:about to accept:0
+ INFO: producer:finished with accept on socket:2
+ INFO: producer:got mutex lock
+:0
+ INFO: producer:have mutex after bufsizecheck
+:0
+ INFO: producer:mutex unlocked
+:0
+ INFO: producer:looping:1
+ INFO: producer:about to accept:0
  INFO: request:GET /nigel.jpg HTTP/1.1**Host: localhost:8100**Connection: keep-alive**Cache-Control: max-age=0**Upgrade-Insecure-Requests: 1**User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/64.0.3282.167 Chrome/64.0.3282.167 Safari/537.36**Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8**Accept-Encoding: gzip, deflate, br**Accept-Language: en-US,en;q=0.9****:1
+ INFO: web:about to open:0
  INFO: SEND:nigel.jpg:1
  INFO: Header:HTTP/1.1 200 OK
 Server: nweb/23.0
@@ -190,13 +599,337 @@ Connection: close
 Content-Type: image/jpg
 
 :1
- INFO: producer:finished with accept:0
+ INFO: web:about to write:0
+ INFO: consumer:finished with web:0
+ INFO: consumer:about to close socket:0
+ INFO: consumer:looping:0
+ INFO: consumer:starting loop:0
+ INFO: consumer:about to run web:0
+ INFO: web:fd:2
+ INFO: web:to read:0
+ INFO: producer:finished with accept on socket:3
  INFO: producer:got mutex lock
 :0
  INFO: producer:have mutex after bufsizecheck
 :0
  INFO: producer:mutex unlocked
 :0
- INFO: producer looping
-:stuff:1
+ INFO: producer:looping:1
  INFO: producer:about to accept:0
+ INFO: request:GET /nigel.jpg HTTP/1.1**Host: localhost:8100**Connection: keep-alive**Cache-Control: max-age=0**Upgrade-Insecure-Requests: 1**User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/64.0.3282.167 Chrome/64.0.3282.167 Safari/537.36**Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8**Accept-Encoding: gzip, deflate, br**Accept-Language: en-US,en;q=0.9****:2
+ INFO: web:about to open:0
+ INFO: SEND:nigel.jpg:2
+ INFO: Header:HTTP/1.1 200 OK
+Server: nweb/23.0
+Content-Length: 10184
+Connection: close
+Content-Type: image/jpg
+
+:2
+ INFO: web:about to write:0
+ INFO: consumer:finished with web:0
+ INFO: consumer:about to close socket:0
+ INFO: consumer:looping:0
+ INFO: consumer:starting loop:0
+ INFO: consumer:about to run web:0
+ INFO: web:fd:3
+ INFO: web:to read:0
+ INFO: producer:finished with accept on socket:1
+ INFO: producer:got mutex lock
+:0
+ INFO: producer:have mutex after bufsizecheck
+:0
+ INFO: producer:mutex unlocked
+:0
+ INFO: producer:looping:1
+ INFO: producer:about to accept:0
+ INFO: request:GET /nigel.jpg HTTP/1.1**Host: localhost:8100**Connection: keep-alive**Cache-Control: max-age=0**Upgrade-Insecure-Requests: 1**User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/64.0.3282.167 Chrome/64.0.3282.167 Safari/537.36**Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8**Accept-Encoding: gzip, deflate, br**Accept-Language: en-US,en;q=0.9****:3
+ INFO: web:about to open:0
+ INFO: SEND:nigel.jpg:3
+ INFO: Header:HTTP/1.1 200 OK
+Server: nweb/23.0
+Content-Length: 10184
+Connection: close
+Content-Type: image/jpg
+
+:3
+ INFO: web:about to write:0
+ INFO: consumer:finished with web:0
+ INFO: consumer:about to close socket:0
+ INFO: consumer:looping:0
+ INFO: consumer:starting loop:0
+ INFO: consumer:about to run web:0
+ INFO: web:fd:1
+ INFO: web:to read:0
+ INFO: producer:finished with accept on socket:2
+ INFO: producer:got mutex lock
+:0
+ INFO: producer:have mutex after bufsizecheck
+:0
+ INFO: producer:mutex unlocked
+:0
+ INFO: producer:looping:1
+ INFO: producer:about to accept:0
+ INFO: request:GET /nigel.jpg HTTP/1.1**Host: localhost:8100**Connection: keep-alive**Cache-Control: max-age=0**Upgrade-Insecure-Requests: 1**User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/64.0.3282.167 Chrome/64.0.3282.167 Safari/537.36**Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8**Accept-Encoding: gzip, deflate, br**Accept-Language: en-US,en;q=0.9****:4
+ INFO: web:about to open:0
+ INFO: SEND:nigel.jpg:4
+ INFO: Header:HTTP/1.1 200 OK
+Server: nweb/23.0
+Content-Length: 10184
+Connection: close
+Content-Type: image/jpg
+
+:4
+ INFO: web:about to write:0
+ INFO: consumer:finished with web:0
+ INFO: consumer:about to close socket:0
+ INFO: consumer:looping:0
+ INFO: consumer:starting loop:0
+ INFO: consumer:about to run web:0
+ INFO: web:fd:2
+ INFO: web:to read:0
+ INFO: producer:finished with accept on socket:3
+ INFO: producer:got mutex lock
+:0
+ INFO: producer:have mutex after bufsizecheck
+:0
+ INFO: producer:mutex unlocked
+:0
+ INFO: producer:looping:1
+ INFO: producer:about to accept:0
+ INFO: request:GET /nigel.jpg HTTP/1.1**Host: localhost:8100**Connection: keep-alive**Cache-Control: max-age=0**Upgrade-Insecure-Requests: 1**User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/64.0.3282.167 Chrome/64.0.3282.167 Safari/537.36**Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8**Accept-Encoding: gzip, deflate, br**Accept-Language: en-US,en;q=0.9****:5
+ INFO: web:about to open:0
+ INFO: SEND:nigel.jpg:5
+ INFO: Header:HTTP/1.1 200 OK
+Server: nweb/23.0
+Content-Length: 10184
+Connection: close
+Content-Type: image/jpg
+
+:5
+ INFO: web:about to write:0
+ INFO: producer:finished with accept on socket:1
+ INFO: producer:got mutex lock
+:0
+ INFO: producer:have mutex after bufsizecheck
+:0
+ INFO: producer:mutex unlocked
+:0
+ INFO: producer:looping:1
+ INFO: producer:about to accept:0
+ INFO: consumer:finished with web:0
+ INFO: consumer:about to close socket:0
+ INFO: consumer:looping:0
+ INFO: consumer:starting loop:0
+ INFO: consumer:about to run web:0
+ INFO: web:fd:3
+ INFO: web:to read:0
+ INFO: request:GET /nigel.jpg HTTP/1.1**Host: localhost:8100**Connection: keep-alive**Cache-Control: max-age=0**Upgrade-Insecure-Requests: 1**User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/64.0.3282.167 Chrome/64.0.3282.167 Safari/537.36**Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8**Accept-Encoding: gzip, deflate, br**Accept-Language: en-US,en;q=0.9****:6
+ INFO: web:about to open:0
+ INFO: SEND:nigel.jpg:6
+ INFO: Header:HTTP/1.1 200 OK
+Server: nweb/23.0
+Content-Length: 10184
+Connection: close
+Content-Type: image/jpg
+
+:6
+ INFO: web:about to write:0
+ INFO: consumer:finished with web:0
+ INFO: consumer:about to close socket:0
+ INFO: consumer:looping:0
+ INFO: consumer:starting loop:0
+ INFO: consumer:about to run web:0
+ INFO: web:fd:1
+ INFO: web:to read:0
+ INFO: producer:finished with accept on socket:9
+ INFO: producer:got mutex lock
+:0
+ INFO: producer:have mutex after bufsizecheck
+:0
+ INFO: producer:mutex unlocked
+:0
+ INFO: producer:looping:1
+ INFO: producer:about to accept:0
+ INFO: request:GET /nigel.jpg HTTP/1.1**Host: localhost:8100**Connection: keep-alive**Cache-Control: max-age=0**Upgrade-Insecure-Requests: 1**User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/64.0.3282.167 Chrome/64.0.3282.167 Safari/537.36**Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8**Accept-Encoding: gzip, deflate, br**Accept-Language: en-US,en;q=0.9****:7
+ INFO: web:about to open:0
+ INFO: SEND:nigel.jpg:7
+ INFO: Header:HTTP/1.1 200 OK
+Server: nweb/23.0
+Content-Length: 10184
+Connection: close
+Content-Type: image/jpg
+
+:7
+ INFO: web:about to write:0
+ INFO: producer:finished with accept on socket:3
+ INFO: producer:got mutex lock
+:0
+ INFO: producer:have mutex after bufsizecheck
+:0
+ INFO: producer:mutex unlocked
+:0
+ INFO: producer:looping:1
+ INFO: producer:about to accept:0
+ INFO: consumer:finished with web:0
+ INFO: consumer:about to close socket:0
+ INFO: consumer:looping:0
+ INFO: consumer:starting loop:0
+ INFO: consumer:about to run web:0
+ INFO: web:fd:9
+ INFO: web:to read:0
+ INFO: request:GET /nigel.jpg HTTP/1.1**Host: localhost:8100**Connection: keep-alive**Cache-Control: max-age=0**Upgrade-Insecure-Requests: 1**User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/64.0.3282.167 Chrome/64.0.3282.167 Safari/537.36**Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8**Accept-Encoding: gzip, deflate, br**Accept-Language: en-US,en;q=0.9****:8
+ INFO: web:about to open:0
+ INFO: SEND:nigel.jpg:8
+ INFO: Header:HTTP/1.1 200 OK
+Server: nweb/23.0
+Content-Length: 10184
+Connection: close
+Content-Type: image/jpg
+
+:8
+ INFO: web:about to write:0
+ INFO: producer:finished with accept on socket:11
+ INFO: producer:got mutex lock
+:0
+ INFO: producer:have mutex after bufsizecheck
+:0
+ INFO: producer:mutex unlocked
+:0
+ INFO: producer:looping:1
+ INFO: producer:about to accept:0
+ INFO: consumer:finished with web:0
+ INFO: consumer:about to close socket:0
+ INFO: consumer:looping:0
+ INFO: consumer:starting loop:0
+ INFO: consumer:about to run web:0
+ INFO: web:fd:3
+ INFO: web:to read:0
+ INFO: request:GET /nigel.jpg HTTP/1.1**Host: localhost:8100**Connection: keep-alive**Cache-Control: max-age=0**Upgrade-Insecure-Requests: 1**User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/64.0.3282.167 Chrome/64.0.3282.167 Safari/537.36**Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8**Accept-Encoding: gzip, deflate, br**Accept-Language: en-US,en;q=0.9****:9
+ INFO: web:about to open:0
+ INFO: SEND:nigel.jpg:9
+ INFO: Header:HTTP/1.1 200 OK
+Server: nweb/23.0
+Content-Length: 10184
+Connection: close
+Content-Type: image/jpg
+
+:9
+ INFO: web:about to write:0
+ INFO: consumer:finished with web:0
+ INFO: consumer:about to close socket:0
+ INFO: consumer:looping:0
+ INFO: consumer:starting loop:0
+ INFO: consumer:about to run web:0
+ INFO: web:fd:11
+ INFO: web:to read:0
+ INFO: producer:finished with accept on socket:12
+ INFO: producer:got mutex lock
+:0
+ INFO: producer:have mutex after bufsizecheck
+:0
+ INFO: producer:mutex unlocked
+:0
+ INFO: producer:looping:1
+ INFO: producer:about to accept:0
+ INFO: request:GET /nigel.jpg HTTP/1.1**Host: localhost:8100**Connection: keep-alive**Cache-Control: max-age=0**Upgrade-Insecure-Requests: 1**User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/64.0.3282.167 Chrome/64.0.3282.167 Safari/537.36**Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8**Accept-Encoding: gzip, deflate, br**Accept-Language: en-US,en;q=0.9****:10
+ INFO: web:about to open:0
+ INFO: SEND:nigel.jpg:10
+ INFO: Header:HTTP/1.1 200 OK
+Server: nweb/23.0
+Content-Length: 10184
+Connection: close
+Content-Type: image/jpg
+
+:10
+ INFO: web:about to write:0
+ INFO: producer:finished with accept on socket:3
+ INFO: producer:got mutex lock
+:0
+ INFO: producer:have mutex after bufsizecheck
+:0
+ INFO: producer:mutex unlocked
+:0
+ INFO: producer:looping:1
+ INFO: producer:about to accept:0
+ INFO: consumer:finished with web:0
+ INFO: consumer:about to close socket:0
+ INFO: consumer:looping:0
+ INFO: consumer:starting loop:0
+ INFO: consumer:about to run web:0
+ INFO: web:fd:12
+ INFO: web:to read:0
+ INFO: request:GET /nigel.jpg HTTP/1.1**Host: localhost:8100**Connection: keep-alive**Cache-Control: max-age=0**Upgrade-Insecure-Requests: 1**User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/64.0.3282.167 Chrome/64.0.3282.167 Safari/537.36**Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8**Accept-Encoding: gzip, deflate, br**Accept-Language: en-US,en;q=0.9****:11
+ INFO: web:about to open:0
+ INFO: SEND:nigel.jpg:11
+ INFO: Header:HTTP/1.1 200 OK
+Server: nweb/23.0
+Content-Length: 10184
+Connection: close
+Content-Type: image/jpg
+
+:11
+ INFO: web:about to write:0
+ INFO: producer:finished with accept on socket:14
+ INFO: producer:got mutex lock
+:0
+ INFO: producer:have mutex after bufsizecheck
+:0
+ INFO: producer:mutex unlocked
+:0
+ INFO: producer:looping:1
+ INFO: producer:about to accept:0
+ INFO: consumer:finished with web:0
+ INFO: consumer:about to close socket:0
+ INFO: consumer:looping:0
+ INFO: consumer:starting loop:0
+ INFO: consumer:about to run web:0
+ INFO: web:fd:3
+ INFO: web:to read:0
+ INFO: request:GET /nigel.jpg HTTP/1.1**Host: localhost:8100**Connection: keep-alive**Cache-Control: max-age=0**Upgrade-Insecure-Requests: 1**User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/64.0.3282.167 Chrome/64.0.3282.167 Safari/537.36**Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8**Accept-Encoding: gzip, deflate, br**Accept-Language: en-US,en;q=0.9****:12
+ INFO: web:about to open:0
+ INFO: SEND:nigel.jpg:12
+ INFO: Header:HTTP/1.1 200 OK
+Server: nweb/23.0
+Content-Length: 10184
+Connection: close
+Content-Type: image/jpg
+
+:12
+ INFO: web:about to write:0
+ INFO: producer:finished with accept on socket:15
+ INFO: producer:got mutex lock
+:0
+ INFO: producer:have mutex after bufsizecheck
+:0
+ INFO: producer:mutex unlocked
+:0
+ INFO: producer:looping:1
+ INFO: producer:about to accept:0
+ INFO: producer:finished with accept on socket:16
+ INFO: producer:got mutex lock
+:0
+ INFO: producer:have mutex after bufsizecheck
+:0
+ INFO: producer:mutex unlocked
+:0
+ INFO: producer:looping:1
+ INFO: producer:about to accept:0
+ INFO: consumer:finished with web:0
+ INFO: consumer:about to close socket:0
+ INFO: consumer:looping:0
+ INFO: consumer:starting loop:0
+ INFO: consumer:about to run web:0
+ INFO: web:fd:14
+ INFO: web:to read:0
+ INFO: request:GET /nigel.jpg HTTP/1.1**Host: localhost:8100**Connection: keep-alive**Cache-Control: max-age=0**Upgrade-Insecure-Requests: 1**User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/64.0.3282.167 Chrome/64.0.3282.167 Safari/537.36**Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8**Accept-Encoding: gzip, deflate, br**Accept-Language: en-US,en;q=0.9****:13
+ INFO: web:about to open:0
+ INFO: SEND:nigel.jpg:13
+ INFO: Header:HTTP/1.1 200 OK
+Server: nweb/23.0
+Content-Length: 10184
+Connection: close
+Content-Type: image/jpg
+
+:13
+ INFO: web:about to write:0

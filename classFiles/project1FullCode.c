@@ -21,7 +21,7 @@
 
 
 //Constants //TODO figure out how to really handle these values
-const int NUM_THREADS = 1;
+const int NUM_THREADS = 10;
 const int BUF_SIZE = 10;
 
 //intiating mutex and conditions from the start so that it could be shared by both the consumer and producer method
@@ -117,18 +117,14 @@ void logger(int type, char *s1, char *s2, int socket_fd)
 /* this is a child web server process, so we can exit on errors */
 void web(int fd, int hit)
 {
+	logger(LOG,"web","fd",fd);
 	int j, file_fd, buflen;
 	long i, ret, len;
 	char * fstr;
 	static char buffer[BUFSIZE+1]; /* static so zero filled */
-
+	logger(LOG,"web","to read",0);
 	ret =read(fd,buffer,BUFSIZE); 	/* read Web request in one go */
-	if(errno == EAGAIN){
-		logger(LOG,"dang","EAGAIN",0);
-	}
-	if(errno == EINTR){
-		logger(LOG,"dang","EIN",0);
-	}
+
 
 	if(ret == 0 || ret == -1) {	/* read failure stop now */
 		logger(FORBIDDEN,"failed to read browser request","",fd);
@@ -167,7 +163,7 @@ void web(int fd, int hit)
 		}
 	}
 	if(fstr == 0) logger(FORBIDDEN,"file extension type not supported",buffer,fd);
-
+	logger(LOG,"web","about to open",0);
 	if(( file_fd = open(&buffer[5],O_RDONLY)) == -1) {  /* open the file for reading */
 		logger(NOTFOUND, "failed to open file",&buffer[5],fd);
 	}
@@ -176,6 +172,7 @@ void web(int fd, int hit)
 	      (void)lseek(file_fd, (off_t)0, SEEK_SET); /* lseek back to the file start ready for reading */
           (void)sprintf(buffer,"HTTP/1.1 200 OK\nServer: nweb/%d.0\nContent-Length: %ld\nConnection: close\nContent-Type: %s\n\n", VERSION, len, fstr); /* Header + a blank line */
 	logger(LOG,"Header",buffer,hit);
+	logger(LOG,"web","about to write",0);
 	dummy = write(fd,buffer,strlen(buffer));
 
     /* Send the statistical headers described in the paper, example below
@@ -189,8 +186,8 @@ void web(int fd, int hit)
 		dummy = write(fd,buffer,ret);
 	}
 	sleep(1);	/* allow socket to drain before signalling the socket is closed */
-	close(fd);
-	exit(1);
+
+
 }
 
 void * producer(void *listenfdAddress){
@@ -217,7 +214,8 @@ void * producer(void *listenfdAddress){
 		logger(LOG,"producer","about to accept",0);
 		if((socketfd = accept(listenfd, (struct sockaddr *)&cli_addr, &length)) < 0)
 			logger(ERROR,"system call","accept",0);
-		logger(LOG,"producer","finished with accept on socket: ",socketfd);
+		logger(LOG,"producer","finished with accept on socket",socketfd);
+
 
 		pthread_mutex_lock(&m);
 		logger(LOG,"producer","got mutex lock\n",0);
@@ -234,10 +232,10 @@ void * producer(void *listenfdAddress){
 			struct Request newRequest;
 			/*
 			//logic to determine if something is an image
-			static char buf[BUFSIZE+1]; 
+			static char buf[BUFSIZE+1];
 			long ret;
-			ret = read(socketfd,buf,BUFSIZE); 	
-			for(i=0;i<ret;i++){	
+			ret = read(socketfd,buf,BUFSIZE);
+			for(i=0;i<ret;i++){
 				if(buffer[i] == '.'){
 					if( !strncmp(buffer,"gif",4) || !strncmp(buffer,"jpg",4) ||
 					    !strncmp(buffer,"jpeg",)5 || !strncmp(buffer,"png",4) ||
@@ -246,14 +244,14 @@ void * producer(void *listenfdAddress){
 						//item is an image
 						newRequest.type = IMAGE;
 					}
-					else if	(!strncmp(buffer,"htm",4) || !strncmp(buffer,"html",4){	
+					else if	(!strncmp(buffer,"htm",4) || !strncmp(buffer,"html",4){
 						//item is text
 						newRequest.type = TEXT;
 					}
-	
+
 			}
 			*/
-			
+
 			bzero(&newRequest, sizeof(newRequest));
 			newRequest.thread_id = requestBuffer.number_of_requests_dispatched;
 			newRequest.thread_count = 0;
@@ -272,7 +270,7 @@ void * producer(void *listenfdAddress){
 		pthread_cond_signal(&c_cons);
 		//printf("producer inserted %d\n", newRequest); fflush(stdout);//TODO: not sure what you wanted with this code but its not properly formated so commented it out
 		//(void)close(socketfd);//TODO:needs to check for errors
-		logger(LOG,"producer looping\n","stuff",1);
+		logger(LOG,"producer","looping",1);
 	}
 }
 
@@ -280,6 +278,7 @@ void * consumer(void * args){
 	logger(LOG,"consumer","born",0);
 	struct Request currentRequest;
 	while(1){
+		logger(LOG,"consumer","starting loop",0);
 		pthread_mutex_lock(&m);
 
 		if(requestBuffer.num < 0){
@@ -328,11 +327,11 @@ void * consumer(void * args){
 		if(!isImage){
 			requestBuffer.rem = (requestBuffer.rem+1) % BUF_SIZE;
 		}
-		requestBuffer.num--;				
-			
+		requestBuffer.num--;
+
             break;
         case HPHC:
-           printf("Running HPHC scheduling: ");	
+           printf("Running HPHC scheduling: ");
            	printf("Running HPIC scheduling:");
 		//check if its a an text
 		int count;
@@ -355,8 +354,8 @@ void * consumer(void * args){
 		if(!isText){
 			requestBuffer.rem = (requestBuffer.rem+1) % BUF_SIZE;
 		}
-		requestBuffer.num--;	
-           
+		requestBuffer.num--;
+
            break;
         default:
    		}
@@ -365,9 +364,11 @@ void * consumer(void * args){
 
 	logger(LOG,"consumer","about to run web",0);
 	web(currentRequest.socketfd, currentRequest.hit);//TODO: this is a big mistake, the mutex will not be unlocked until web returns, So i switched it. it will not cause errors when multiple threads try to read this variable
+	logger(LOG,"consumer","finished with web",0);
 	pthread_cond_signal (&c_prod);
+	logger(LOG,"consumer","about to close socket",0);
 	(void)close(currentRequest.socketfd);
-
+	logger(LOG,"consumer","looping",0);
 	}
 }
 
@@ -406,17 +407,17 @@ int main(int argc, char **argv)
 		(void)printf("ERROR: Can't Change to directory %s\n",argv[2]);
 		exit(4);
 	}
-	
+
 	/*
 	if( !strncmp(argv[5],"FIFO"   ,5 ) || !strncmp(argv[5],"ANY", 4 ) ||
 	    !strncmp(argv[5],"HPIC",5 ) || !strncmp(argv[5],"HPHC", 5 ) ){
 		logger(ERROR, "main","illegal mode argument",0);
 		exit(3);
-	} 
+	}
 	mode = argv[5];
 	*/
 	/* Become deamon + unstopable and no zombies children (= no wait()) */
-	
+
 	if(fork() != 0)
 		return 0; /* parent returns OK to shell */
 	(void)signal(SIGCHLD, SIG_IGN); /* ignore child death */
