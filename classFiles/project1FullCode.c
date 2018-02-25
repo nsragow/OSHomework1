@@ -194,6 +194,8 @@ void web(int fd, int hit)
 		dummy = write(fd,buffer,ret);
 		logger(LOG,"web","writing finito",fd);
 	}
+	char eof = 0;
+	dummy = write(fd,&eof,sizeof(eof));
 	logger(LOG,"web","finished loop write",0);
 	sleep(1);	/* allow socket to drain before signalling the socket is closed */
 
