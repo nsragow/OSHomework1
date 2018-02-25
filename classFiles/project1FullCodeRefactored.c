@@ -162,7 +162,6 @@ void web(int fd, int hit, char buffer[], char * fstr)
 
 void * producer(void *listenfdAddress){
 	int hit, socketfd;
-	int len, buflen;
 
 	int listenfd = *(int *)listenfdAddress;//TODO thsi line must be causing an error
 
@@ -219,22 +218,22 @@ void * producer(void *listenfdAddress){
 			for(i=0;i<ret;i++)	/* remove CF and LF characters */
 				if(newRequest.buf[i] == '\r' || newRequest.buf[i] == '\n')
 				newRequest.buf[i]='*';
-				logger(LOG,"request",newRequest.buf,hit);
-				if( strncmp(newRequest.buf,"GET ",4) && strncmp(newRequest.buf,"get ",4) ) {
-				logger(FORBIDDEN,"Only simple GET operation supported",newRequest.buf,socketfd);
+			logger(LOG,"request",newRequest.buf,hit);
+			if(strncmp(newRequest.buf,"GET ",4) && strncmp(newRequest.buf,"get ",4) ) {
+			logger(FORBIDDEN,"Only simple GET operation supported",newRequest.buf,socketfd);
+			}
+			for(i=4;i<BUFSIZE;i++) { /* null terminate after the second space to ignore extra stuff */
+				if(newRequest.buf[i] == ' ') { /* string is "GET URL " +lots of other stuff */
+					newRequest.buf[i] = 0;
+					break;
 				}
-				for(i=4;i<BUFSIZE;i++) { /* null terminate after the second space to ignore extra stuff */
-					if(newRequest.buf[i] == ' ') { /* string is "GET URL " +lots of other stuff */
-						newRequest.buf[i] = 0;
-						break;
-					}
+			}
+			for(j=0;j<i-1;j++) 	/* check for illegal parent directory use .. */
+				if(newRequest.buf[j] == '.' && newRequest.buf[j+1] == '.') {
+				logger(FORBIDDEN,"Parent directory (..) path names not supported",newRequest.buf,socketfd);
 				}
-				for(j=0;j<i-1;j++) 	/* check for illegal parent directory use .. */
-					if(newRequest.buf[j] == '.' && newRequest.buf[j+1] == '.') {
-					logger(FORBIDDEN,"Parent directory (..) path names not supported",newRequest.buf,socketfd);
-					}
-				if( !strncmp(&newRequest.buf[0],"GET /\0",6) || !strncmp(&newRequest.buf[0],"get /\0",6) ) /* convert no filename to index file */
-					(void)strcpy(newRequest.buf,"GET /index.html");
+			if( !strncmp(&newRequest.buf[0],"GET /\0",6) || !strncmp(&newRequest.buf[0],"get /\0",6) ) /* convert no filename to index file */
+				(void)strcpy(newRequest.buf,"GET /index.html");
 
 			
 			buflen=strlen(newRequest.buf);
