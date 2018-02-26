@@ -10,26 +10,35 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <pthread.h>
-#define VERSION 23
-#define BUFSIZE 8096
+#include <sys/time.h>
+#define VERSION    23
+#define BUFSIZE  8096
 #define ERROR      42
 #define LOG        44
 #define FORBIDDEN 403
 #define NOTFOUND  404
 #define TEXT        0
-#define IMAGE	    1
+#define IMAGE	      1
+
 
 
 //Constants //TODO figure out how to really handle these values
 const int NUM_THREADS = 10;
 const int BUF_SIZE = 10;
 
+const int IMAGE_TYPE = 0;
+const int HTML_TYPE = 1;
+
 //intiating mutex and conditions from the start so that it could be shared by both the consumer and producer method
 //without having to make it a parameter
 pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t c_cons = PTHREAD_COND_INITIALIZER;
 pthread_cond_t c_prod = PTHREAD_COND_INITIALIZER;
+struct timeval startTime;
+struct timezone startZone;
 
+int amount_of_requests_read;
+int amount_of_requests_passed;
 int mode;
 
 /*
@@ -62,6 +71,12 @@ struct Request{
 	int listenfd;
 	int socketfd;
 	int type;
+	int read_before;
+	int passed_at_arrival;
+	int passed_at_passed;
+	struct timeval * firstSaw;
+	struct timeval * passedToConsumer;
+	struct timeval * finishedReading;
 };
 
 struct Buffer{//TODO: make function to initilize this
@@ -113,9 +128,26 @@ void logger(int type, char *s1, char *s2, int socket_fd)
 	if(type == ERROR || type == NOTFOUND || type == FORBIDDEN) exit(3);
 }
 
+void timeSubtract(struct timeval * original,struct timeval * now, struct timeval * to_return){
+  long original_sec = original->tv_sec;
+  long original_micro = original->tv_usec;
+  long now_sec = now->tv_sec;
+  long now_micro = now->tv_usec;
+
+  to_return->tv_sec = now_sec - original_sec;
+
+  if(now_micro < original_micro){
+    long diffirence =  original_micro - now_micro;
+    to_return->tv_usec = 1000000 - diffirence;
+    to_return->tv_sec--;
+  }
+  else{
+    to_return->tv_usec = now_micro - original_micro;
+  }
+}
 
 /* this is a child web server process, so we can exit on errors */
-void web(int fd, int hit)
+void web(int fd, int hit, struct Request * requestFromWeb)
 {
 	logger(LOG,"web","fd",fd);
 	int j, file_fd, buflen;
@@ -168,6 +200,26 @@ void web(int fd, int hit)
 		}
 	}
 	if(fstr == 0) logger(FORBIDDEN,"file extension type not supported",buffer,fd);
+
+	if(fstr == extensions[0].filetype){
+		requestFromWeb->type = IMAGE_TYPE;
+	}
+	else if(fstr == extensions[1].filetype){
+		requestFromWeb->type = IMAGE_TYPE;
+	}
+	else if(fstr == extensions[2].filetype){
+		requestFromWeb->type = IMAGE_TYPE;
+	}
+	else if(fstr == extensions[3].filetype){
+		requestFromWeb->type = IMAGE_TYPE;
+	}
+	else if(fstr == extensions[4].filetype){
+		requestFromWeb->type = IMAGE_TYPE;
+	}
+	else{
+		requestFromWeb->type = HTML_TYPE;
+	}
+
 	logger(LOG,"web","about to open",0);
 	if(( file_fd = open(&buffer[5],O_RDONLY)) == -1) {  /* open the file for reading */
 		logger(NOTFOUND, "failed to open file",&buffer[5],fd);
@@ -177,9 +229,19 @@ void web(int fd, int hit)
 	      (void)lseek(file_fd, (off_t)0, SEEK_SET); /* lseek back to the file start ready for reading */
           (void)sprintf(buffer,"HTTP/1.1 200 OK\nServer: nweb/%d.0\nContent-Length: %ld\nConnection: close\nContent-Type: %s\n\n", VERSION, len, fstr); /* Header + a blank line */
 	logger(LOG,"Header",buffer,hit);
-	logger(LOG,"web","about to write",0);
+
+	struct timeval       arrivalHere;
+	struct timeval arrivalSinceStart;
+	struct timezone     arrivalHereZ;
+	gettimeofday(&arrivalHere,&arrivalHereZ);
+	timeSubtract(&startTime,&arrivalHere,&arrivalSinceStart);
+	requestFromWeb->finishedReading = &arrivalSinceStart;
+	requestFromWeb->read_before = amount_of_requests_read;
+	amount_of_requests_read++;
+
+
 	dummy = write(fd,buffer,strlen(buffer));
-	logger(LOG,"web","finished first write",0);
+
 
     /* Send the statistical headers described in the paper, example below
 
@@ -208,7 +270,7 @@ void * producer(void *listenfdAddress){
 	int listenfd = *(int *)listenfdAddress;//TODO thsi line must be causing an error
 
 	socklen_t length;
-	//logger(LOG,"producer","born",0);
+
 
 
 
@@ -226,10 +288,25 @@ void * producer(void *listenfdAddress){
 		//logger(LOG,"producer","about to accept",0);
 		if((socketfd = accept(listenfd, (struct sockaddr *)&cli_addr, &length)) < 0)
 			logger(ERROR,"system call","accept",0);
-		//logger(LOG,"producer","finished with accept on socket",socketfd);
 
+		struct timeval       arrivalHere;
+		struct timeval arrivalSinceStart;
+		struct timezone     arrivalHereZ;
+		gettimeofday(&arrivalHere,&arrivalHereZ);
+		timeSubtract(&startTime,&arrivalHere,&arrivalSinceStart);
 
+		struct Request newRequest;
+		bzero(&newRequest, sizeof(newRequest));
+		newRequest.thread_id = requestBuffer.number_of_requests_dispatched;
+		newRequest.thread_count = 0;
+		newRequest.thread_html_count = 0;
+		newRequest.thread_image_count = 0;
+		newRequest.hit = hit;//the hit in the for loop (which may have to be reconfigured?)
+		newRequest.listenfd = listenfd;//from earlier in the code
+		newRequest.socketfd = socketfd;////from earlier in the code
+	  newRequest.firstSaw = &arrivalSinceStart;
 		pthread_mutex_lock(&m);
+		newRequest.passed_at_arrival = amount_of_requests_passed;
 		//logger(LOG,"producer","got mutex lock\n",0);
 			if(requestBuffer.num > BUF_SIZE){
 				logger(LOG,"producer","fatal error num bigger than bufsize\n",0);
@@ -241,7 +318,6 @@ void * producer(void *listenfdAddress){
 			}
 			//logger(LOG,"producer","have mutex after bufsizecheck\n",0);
 			//critical section: create request object
-			struct Request newRequest;
 			/*
 			//logic to determine if something is an image
 			static char buf[BUFSIZE+1];
@@ -264,14 +340,7 @@ void * producer(void *listenfdAddress){
 			}
 			*/
 
-			bzero(&newRequest, sizeof(newRequest));
-			newRequest.thread_id = requestBuffer.number_of_requests_dispatched;
-			newRequest.thread_count = 0;
-			newRequest.thread_html_count = 0;
-			newRequest.thread_image_count = 0;
-			newRequest.hit = hit;//the hit in the for loop (which may have to be reconfigured?)
-			newRequest.listenfd = listenfd;//from earlier in the code
-			newRequest.socketfd = socketfd;////from earlier in the code
+
 			//and add the reqeust object to the buffer
 			requestBuffer.requests[requestBuffer.add] = newRequest;
 			requestBuffer.add = (requestBuffer.add +1) % BUF_SIZE;
@@ -288,28 +357,38 @@ void * producer(void *listenfdAddress){
 }
 
 void * consumer(void * args){
-	//logger(LOG,"consumer","born",0);
+	int thread_id = *(int *)args;
+	int numOfProcessedRequests = 0;
+	thread_id++;//TODO temp to supress errors
+	//TODO: add time recieved
 	struct Request currentRequest;
 	while(1){
-
+logger(LOG,"consumer","changing rem",requestBuffer.rem);
 		pthread_mutex_lock(&m);
 
 		if(requestBuffer.num < 0){
 			logger(LOG,"consumer","fatal error num less than sero\n",0);
 			exit(1);//meaningless error messsage
 		}
+
 		while(requestBuffer.num == 0){
-			logger(LOG,"consumer","waiting",0);
 			pthread_cond_wait (&c_cons, &m);
-			logger(LOG,"consumer","left wait",0);
 		}
-		logger(LOG,"consumer","changing rem",requestBuffer.rem);
+
+
 		currentRequest = requestBuffer.requests[requestBuffer.rem];
 		requestBuffer.rem = (requestBuffer.rem+1) % BUF_SIZE;
 		requestBuffer.num--;
-		logger(LOG,"consumer","rem now is",requestBuffer.rem);
-		logger(LOG,"consumer","num now is",requestBuffer.num);
-		logger(LOG,"consumer","unlocking",0);
+
+		struct timeval       arrivalHere;
+		struct timeval arrivalSinceStart;
+		struct timezone     arrivalHereZ;
+		gettimeofday(&arrivalHere,&arrivalHereZ);
+	  timeSubtract(&startTime,&arrivalHere,&arrivalSinceStart);
+		currentRequest.passedToConsumer = &arrivalSinceStart;
+		currentRequest.passed_at_passed = amount_of_requests_passed;
+		amount_of_requests_passed++;
+		web(currentRequest.socketfd, currentRequest.hit, &currentRequest);
 		pthread_mutex_unlock(&m);
  /*
 		switch (mode) {
@@ -381,17 +460,24 @@ void * consumer(void * args){
 		//(void)close(currentRequest.listenfd);
 
 	logger(LOG,"consumer","about to run web with",currentRequest.socketfd);
-	web(currentRequest.socketfd, currentRequest.hit);
+	//TODO make sure you check on the type that was now updated
+	numOfProcessedRequests++;
 	logger(LOG,"consumer","finished with web",0);
 	pthread_cond_signal (&c_prod);
 	logger(LOG,"consumer","about to close socket",currentRequest.socketfd);
 	(void)close(currentRequest.socketfd);
 	logger(LOG,"consumer","looping",0);
+
 	}
 }
 
 int main(int argc, char **argv)
 {
+
+	int ernum;
+	if((ernum = gettimeofday(&startTime,&startZone)) != 0){
+		logger(ERROR, "main", "time of day error", ernum);
+	}
 	logger(LOG,"main","starting",0);
 	int i, port, /*pid, TODO: commented out because it was not in use*/ listenfd;
 
@@ -481,11 +567,25 @@ int main(int argc, char **argv)
 	//initializning the pool of threads, NUM_THREADS will be command-line input
 	//attr was changed to make the threads detachable rather than joinable
 	for(j = 0; j < NUM_THREADS; j++){
+		int id = j;
 
-		pthread_create(&(con_threads[j]), NULL, consumer,NULL);
+		pthread_create(&(con_threads[j]), NULL, consumer,(void *)&id);
 	}
 
 	//while(1){}
 	int returnOfMainThread = 1;
 	pthread_exit((void *)&returnOfMainThread);
 }
+//arrival time
+//amount arrived before (hit - 1)
+
+//got by worker time
+
+//amount of requests read before this was read
+//time at end of read
+
+//how many requests got to a worker thread before this one (could use the number of completed requests)
+
+//keep track of thread ids ~~
+//the number of requests a single thread has proccessed ~~
+//number of html v image ~~
