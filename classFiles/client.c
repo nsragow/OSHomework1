@@ -62,6 +62,9 @@ void GET(int clientfd, char *path) {
 }
 
 int main(int argc, char **argv) {
+
+int i;
+for(i = 0; i < 10;i++){
   int clientfd;
   char buf[BUF_SIZE];
 
@@ -79,13 +82,16 @@ int main(int argc, char **argv) {
     return 3;
   }
 
-  // Send GET request > stdout
-  GET(clientfd, argv[3]);
-  while (recv(clientfd, buf, BUF_SIZE, 0) > 0) {
-    fputs(buf, stdout);
-    memset(buf, 0, BUF_SIZE);
-  }
+	
+			// Send GET request > stdout
+			GET(clientfd, argv[3]);
+			while (recv(clientfd, buf, BUF_SIZE, 0) > 0) {
+				fputs(buf, stdout);
+				memset(buf, 0, BUF_SIZE);
+			}
+
 
   close(clientfd);
+	}	
   return 0;
 }

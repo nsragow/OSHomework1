@@ -201,16 +201,21 @@ int main(int argc, char **argv)
 	if( listen(listenfd,64) <0)
 		logger(ERROR,"system call","listen",0);
 
-	listenfd = *(int *)&listenfd;
+	static char buf[BUFSIZE+1]; /* static so zero filled */
+
+	
 	for(hit=1; ;hit++) {
 		length = sizeof(cli_addr);
-		if((socketfd = accept(listenfd, (struct sockaddr *)&cli_addr, &length)) < 0)
+		if((socketfd = accept(listenfd, (struct sockaddr *)&cli_addr, &length)) < 0){
 			logger(ERROR,"system call","accept",0);
+		}
+		
 		if((pid = fork()) < 0) {
 			logger(ERROR,"system call","fork",0);
 		}
 		else {
 			if(pid == 0) { 	/* child */
+
 				(void)close(listenfd);
 				web(socketfd,hit); /* never returns */
 			} else { 	/* parent */
@@ -219,3 +224,10 @@ int main(int argc, char **argv)
 		}
 	}
 }
+/*
+				long ret;
+				ret =read(listenfd,buf,BUFSIZE); 	
+				for(i=0;i<ret;i++){	
+				(void)printf(" %c \n",buf[i]);
+				logger(LOG,"main", (char *)buf,0);
+*/

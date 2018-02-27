@@ -61,7 +61,7 @@ int establishConnection(struct addrinfo *info) {
 void * thread(char **argv){
   // Send GET request > stdout
   char buf[BUF_SIZE];
-  GET(clientfd, argv[4]);
+  GET(clientfd, argv[5]);
   pthread_barrier_wait(&barrier);
 
   while (recv(clientfd, buf, BUF_SIZE, 0) > 0) {
