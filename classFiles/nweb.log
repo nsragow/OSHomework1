@@ -664,3 +664,253 @@ X-stat-thread-image: 1
  INFO: consumer:about to close socket:2
  INFO: consumer:looping:0
  INFO: consumer:changing rem:2
+ INFO: nweb starting:8910:19944
+ INFO: consumer:changing rem:0
+ INFO: producer:num is:1
+ INFO: request:GET /index.html HTTP/1.0****:1
+ INFO: faie:report:1
+ INFO: SEND:index.html:1
+ INFO: Header:HTTP/1.1 200 OK
+Server: nweb/23.0
+Content-Length: 248
+Connection: close
+Content-Type: text/html
+X-stat-req-arrival-count: 0
+X-stat-req-arrival-time: 9
+X-stat-req-dispatch-count: 0
+X-stat-req-dispatch-time: 9
+X-stat-req-complete-count: 0
+X-stat-req-complete-time: 9
+X-stat-req-age: 0
+X-stat-thread-id: 1
+X-stat-thread-count: 0
+X-stat-thread-html: 1
+X-stat-thread-image: 0
+
+:1
+ INFO: web:<HTML>
+<TITLE>nweb
+</TITLE>
+<BODY BGCOLOR="lightblue">
+<H1>nweb Test page</H1>
+<!-- <IMG SRC="nigel.jpg"> -->
+<p>
+Not pretty but it should prove that nweb works :-)
+<p>
+Feedback is welcome to Nigel Griffiths nag@uk.ibm.com
+</table>
+</BODY>
+</HTML>
+complete-time: 9
+X-stat-req-age: 0
+X-stat-thread-id: 1
+X-stat-thread-count: 0
+X-stat-thread-html: 1
+X-stat-thread-image: 0
+
+:0
+ INFO: consumer:about to run web with:1
+ INFO: consumer:finished with web:0
+ INFO: consumer:about to close socket:1
+ INFO: consumer:looping:0
+ INFO: consumer:changing rem:1
+ INFO: producer:num is:1
+ INFO: request:GET /index.html HTTP/1.0****:2
+ INFO: faie:report:2
+ INFO: SEND:index.html:2
+ INFO: Header:HTTP/1.1 200 OK
+Server: nweb/23.0
+Content-Length: 248
+Connection: close
+Content-Type: text/html
+X-stat-req-arrival-count: 1
+X-stat-req-arrival-time: 77
+X-stat-req-dispatch-count: 1
+X-stat-req-dispatch-time: 77
+X-stat-req-complete-count: 1
+X-stat-req-complete-time: 77
+X-stat-req-age: 1
+X-stat-thread-id: 1
+X-stat-thread-count: 1
+X-stat-thread-html: 2
+X-stat-thread-image: 0
+
+:2
+ INFO: web:<HTML>
+<TITLE>nweb
+</TITLE>
+<BODY BGCOLOR="lightblue">
+<H1>nweb Test page</H1>
+<!-- <IMG SRC="nigel.jpg"> -->
+<p>
+Not pretty but it should prove that nweb works :-)
+<p>
+Feedback is welcome to Nigel Griffiths nag@uk.ibm.com
+</table>
+</BODY>
+</HTML>
+q-complete-time: 77
+X-stat-req-age: 1
+X-stat-thread-id: 1
+X-stat-thread-count: 1
+X-stat-thread-html: 2
+X-stat-thread-image: 0
+
+:0
+ INFO: consumer:about to run web with:2
+ INFO: consumer:finished with web:0
+ INFO: consumer:about to close socket:2
+ INFO: consumer:looping:0
+ INFO: consumer:changing rem:2
+ INFO: nweb starting:8910:20643
+ INFO: consumer:changing rem:0
+ INFO: producer:num is:1
+ INFO: request:GET /index.html HTTP/1.0****:1
+ INFO: faie:report:1
+ INFO: SEND:index.html:1
+ INFO: Header:HTTP/1.1 200 OK
+Server: nweb/23.0
+Content-Length: 248
+Connection: close
+Content-Type: text/html
+X-stat-req-arrival-count: 0
+X-stat-req-arrival-time: 4 seconds and 864 microseconds
+X-stat-req-dispatch-count: 0
+X-stat-req-dispatch-time: 4 seconds and 864 microseconds
+X-stat-req-complete-count: 0
+X-stat-req-complete-time: 4 seconds and 864 microseconds
+X-stat-req-age: 0
+X-stat-thread-id: 1
+X-stat-thread-count: 0
+X-stat-thread-html: 1
+X-stat-thread-image: 0
+
+:1
+ INFO: web:<HTML>
+<TITLE>nweb
+</TITLE>
+<BODY BGCOLOR="lightblue">
+<H1>nweb Test page</H1>
+<!-- <IMG SRC="nigel.jpg"> -->
+<p>
+Not pretty but it should prove that nweb works :-)
+<p>
+Feedback is welcome to Nigel Griffiths nag@uk.ibm.com
+</table>
+</BODY>
+</HTML>
+ 864 microseconds
+X-stat-req-complete-count: 0
+X-stat-req-complete-time: 4 seconds and 864 microseconds
+X-stat-req-age: 0
+X-stat-thread-id: 1
+X-stat-thread-count: 0
+X-stat-thread-html: 1
+X-stat-thread-image: 0
+
+:0
+ INFO: consumer:about to run web with:1
+ INFO: consumer:finished with web:0
+ INFO: consumer:about to close socket:1
+ INFO: consumer:looping:0
+ INFO: consumer:changing rem:1
+ INFO: producer:num is:1
+ INFO: request:GET /index.html HTTP/1.0****:2
+ INFO: faie:report:2
+ INFO: SEND:index.html:2
+ INFO: Header:HTTP/1.1 200 OK
+Server: nweb/23.0
+Content-Length: 248
+Connection: close
+Content-Type: text/html
+X-stat-req-arrival-count: 1
+X-stat-req-arrival-time: 26 seconds and 301 microseconds
+X-stat-req-dispatch-count: 1
+X-stat-req-dispatch-time: 26 seconds and 301 microseconds
+X-stat-req-complete-count: 1
+X-stat-req-complete-time: 26 seconds and 301 microseconds
+X-stat-req-age: 1
+X-stat-thread-id: 1
+X-stat-thread-count: 1
+X-stat-thread-html: 2
+X-stat-thread-image: 0
+
+:2
+ INFO: web:<HTML>
+<TITLE>nweb
+</TITLE>
+<BODY BGCOLOR="lightblue">
+<H1>nweb Test page</H1>
+<!-- <IMG SRC="nigel.jpg"> -->
+<p>
+Not pretty but it should prove that nweb works :-)
+<p>
+Feedback is welcome to Nigel Griffiths nag@uk.ibm.com
+</table>
+</BODY>
+</HTML>
+nd 301 microseconds
+X-stat-req-complete-count: 1
+X-stat-req-complete-time: 26 seconds and 301 microseconds
+X-stat-req-age: 1
+X-stat-thread-id: 1
+X-stat-thread-count: 1
+X-stat-thread-html: 2
+X-stat-thread-image: 0
+
+:0
+ INFO: consumer:about to run web with:2
+ INFO: consumer:finished with web:0
+ INFO: consumer:about to close socket:2
+ INFO: consumer:looping:0
+ INFO: consumer:changing rem:2
+ INFO: producer:num is:1
+ INFO: request:GET /index.html HTTP/1.0****:3
+ INFO: faie:report:3
+ INFO: SEND:index.html:3
+ INFO: Header:HTTP/1.1 200 OK
+Server: nweb/23.0
+Content-Length: 248
+Connection: close
+Content-Type: text/html
+X-stat-req-arrival-count: 2
+X-stat-req-arrival-time: 29 seconds and 984 microseconds
+X-stat-req-dispatch-count: 2
+X-stat-req-dispatch-time: 29 seconds and 984 microseconds
+X-stat-req-complete-count: 2
+X-stat-req-complete-time: 29 seconds and 985 microseconds
+X-stat-req-age: 2
+X-stat-thread-id: 1
+X-stat-thread-count: 2
+X-stat-thread-html: 3
+X-stat-thread-image: 0
+
+:3
+ INFO: web:<HTML>
+<TITLE>nweb
+</TITLE>
+<BODY BGCOLOR="lightblue">
+<H1>nweb Test page</H1>
+<!-- <IMG SRC="nigel.jpg"> -->
+<p>
+Not pretty but it should prove that nweb works :-)
+<p>
+Feedback is welcome to Nigel Griffiths nag@uk.ibm.com
+</table>
+</BODY>
+</HTML>
+nd 984 microseconds
+X-stat-req-complete-count: 2
+X-stat-req-complete-time: 29 seconds and 985 microseconds
+X-stat-req-age: 2
+X-stat-thread-id: 1
+X-stat-thread-count: 2
+X-stat-thread-html: 3
+X-stat-thread-image: 0
+
+:0
+ INFO: consumer:about to run web with:1
+ INFO: consumer:finished with web:0
+ INFO: consumer:about to close socket:1
+ INFO: consumer:looping:0
+ INFO: consumer:changing rem:3

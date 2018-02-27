@@ -236,10 +236,8 @@ void web(int fd, int hit, struct Request * requestFromWeb, int thread_id, int am
 	logger(LOG,"SEND",&buffer[5],hit);
 	len = (long)lseek(file_fd, (off_t)0, SEEK_END); /* lseek to the file end to find the length */
 	      (void)lseek(file_fd, (off_t)0, SEEK_SET); /* lseek back to the file start ready for reading */
-          (void)sprintf(buffer,"HTTP/1.1 200 OK\nServer: nweb/%d.0\nContent-Length: %ld\nConnection: close\nContent-Type: %s\nX-stat-req-arrival-count: %d\nX-stat-req-arrival-time: %ld\nX-stat-req-dispatch-count: %d\nX-stat-req-dispatch-time: %ld\nX-stat-req-complete-count: %d\nX-stat-req-complete-time: %ld\nX-stat-req-age: %d\nX-stat-thread-id: %d\nX-stat-thread-count: %d\nX-stat-thread-html: %d\nX-stat-thread-image: %d\n\n", VERSION, len, fstr,requestFromWeb->hit-1,(long)requestFromWeb->firstSaw->tv_sec,requestFromWeb->passed_at_arrival,(long)requestFromWeb->passedToConsumer->tv_sec,requestFromWeb->read_before,(long)requestFromWeb->finishedReading->tv_sec,requestFromWeb->passed_at_arrival,thread_id,amount_of_requests_passed,requestFromWeb->thread_html_count,requestFromWeb->thread_image_count); /* Header + a blank line */
+          (void)sprintf(buffer,"HTTP/1.1 200 OK\nServer: nweb/%d.0\nContent-Length: %ld\nConnection: close\nContent-Type: %s\nX-stat-req-arrival-count: %d\nX-stat-req-arrival-time: %ld seconds and %d microseconds\nX-stat-req-dispatch-count: %d\nX-stat-req-dispatch-time: %ld seconds and %d microseconds\nX-stat-req-complete-count: %d\nX-stat-req-complete-time: %ld seconds and %d microseconds\nX-stat-req-age: %d\nX-stat-thread-id: %d\nX-stat-thread-count: %d\nX-stat-thread-html: %d\nX-stat-thread-image: %d\n\n", VERSION, len, fstr,requestFromWeb->hit-1,(long)requestFromWeb->firstSaw->tv_sec,((int)requestFromWeb->firstSaw->tv_usec)/1000,requestFromWeb->passed_at_arrival,(long)requestFromWeb->passedToConsumer->tv_sec,((int)requestFromWeb->passedToConsumer->tv_usec)/1000,requestFromWeb->read_before,(long)requestFromWeb->finishedReading->tv_sec,((int)requestFromWeb->finishedReading->tv_usec)/1000,requestFromWeb->passed_at_arrival,thread_id,amount_of_requests_passed - (requestFromWeb->hit-1),requestFromWeb->thread_html_count,requestFromWeb->thread_image_count); /* Header + a blank line */
 	logger(LOG,"Header",buffer,hit);
-
-
 
 	dummy = write(fd,buffer,strlen(buffer));
 
