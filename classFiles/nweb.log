@@ -914,3 +914,5 @@ X-stat-thread-image: 0
  INFO: consumer:about to close socket:1
  INFO: consumer:looping:0
  INFO: consumer:changing rem:3
+ INFO: main:starting:0
+ INFO: main:starting:0

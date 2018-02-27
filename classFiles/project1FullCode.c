@@ -11,20 +11,26 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 #include <sys/time.h>
-#define VERSION    23
-#define BUFSIZE  18096
+#include <stdbool.h>
+#define VERSION 23
+#define BUFSIZE 8096
 #define ERROR      42
 #define LOG        44
 #define FORBIDDEN 403
 #define NOTFOUND  404
 #define TEXT        0
-#define IMAGE	      1
+#define IMAGE	    1
+#define FIFO	    2
+#define ANY         3
+#define HPIC	    4
+#define HPHC	    5
 
 
 
 //Constants
-const int NUM_THREADS = 1;
-const int BUF_SIZE = 10;
+int NUM_THREADS;
+int BUF_SIZE;
+int mode;
 
 const int IMAGE_TYPE = 0;
 const int HTML_TYPE = 1;
@@ -63,6 +69,8 @@ struct {
 	{0,0} };
 
 struct Request{
+	char buf[BUFSIZE+1];
+	char * fstr;
 	int thread_id;
 	int thread_count;
 	int thread_html_count;
@@ -150,56 +158,27 @@ void timeSubtract(struct timeval * original,struct timeval * now, struct timeval
 void web(int fd, int hit, struct Request * requestFromWeb, int thread_id, int amount_of_requests_passed)
 {
 
-	int j, file_fd, buflen;
-	long i, ret, len;
+	int file_fd, buflen;
 	char * fstr;
-	char buffer[BUFSIZE+1] = requestFromWeb->buf; /* static so zero filled */
+	long i,len;
 
 
-	//ret =read(fd,buffer,BUFSIZE); 	/* read Web request in one go */
 
 
-	if(ret == 0 || ret == -1) {	/* read failure stop now */
-		logger(LOG,"failed to read browser request","errno",errno);
-		logger(LOG,"failed to read browser request",buffer,errno);
-		logger(LOG,"failed to read browser request","fd",fd);
-		logger(LOG,"failed to read browser request","ret",ret);
-		logger(FORBIDDEN,"failed to read browser request","",fd);
-	}
-	if(ret > 0 && ret < BUFSIZE)	/* return code is valid chars */
-		buffer[ret]=0;		/* terminate the buffer */
-	else buffer[0]=0;
-	for(i=0;i<ret;i++)	/* remove CF and LF characters */
-		if(buffer[i] == '\r' || buffer[i] == '\n')
-			buffer[i]='*';
-	logger(LOG,"request",buffer,hit);
-	if( strncmp(buffer,"GET ",4) && strncmp(buffer,"get ",4) ) {
-		logger(FORBIDDEN,"Only simple GET operation supported",buffer,fd);
-	}
-	for(i=4;i<BUFSIZE;i++) { /* null terminate after the second space to ignore extra stuff */
-		if(buffer[i] == ' ') { /* string is "GET URL " +lots of other stuff */
-			buffer[i] = 0;
-			break;
-		}
-	}
-	for(j=0;j<i-1;j++) 	/* check for illegal parent directory use .. */
-		if(buffer[j] == '.' && buffer[j+1] == '.') {
-			logger(FORBIDDEN,"Parent directory (..) path names not supported",buffer,fd);
-		}
-	if( !strncmp(&buffer[0],"GET /\0",6) || !strncmp(&buffer[0],"get /\0",6) ) /* convert no filename to index file */
-		(void)strcpy(buffer,"GET /index.html");
+
+
 
 	/* work out the file type and check we support it */
-	buflen=strlen(buffer);
+	buflen=strlen(requestFromWeb->buf);
 	fstr = (char *)0;
 	for(i=0;extensions[i].ext != 0;i++) {
 		len = strlen(extensions[i].ext);
-		if( !strncmp(&buffer[buflen-len], extensions[i].ext, len)) {
+		if( !strncmp(&requestFromWeb->buf[buflen-len], extensions[i].ext, len)) {
 			fstr =extensions[i].filetype;
 			break;
 		}
 	}
-	if(fstr == 0) logger(FORBIDDEN,"file extension type not supported",buffer,fd);
+	if(fstr == 0) logger(FORBIDDEN,"file extension type not supported",requestFromWeb->buf,fd);
 
 	if(fstr == extensions[0].filetype){
 		requestFromWeb->thread_image_count++;
@@ -222,8 +201,8 @@ void web(int fd, int hit, struct Request * requestFromWeb, int thread_id, int am
 	}
 
 
-	if(( file_fd = open(&buffer[5],O_RDONLY)) == -1) {  /* open the file for reading */
-		logger(NOTFOUND, "failed to open file",&buffer[5],fd);
+	if(( file_fd = open(&requestFromWeb->buf[5],O_RDONLY)) == -1) {  /* open the file for reading */
+		logger(NOTFOUND, "failed to open file",&requestFromWeb->buf[5],fd);
 	}
 	struct timeval       arrivalHere;
 	struct timeval arrivalSinceStart;
@@ -233,13 +212,13 @@ void web(int fd, int hit, struct Request * requestFromWeb, int thread_id, int am
 	requestFromWeb->finishedReading = &arrivalSinceStart;
 	requestFromWeb->read_before = amount_of_requests_read;
 	amount_of_requests_read++;
-	logger(LOG,"SEND",&buffer[5],hit);
+	logger(LOG,"SEND",&requestFromWeb->buf[5],hit);
 	len = (long)lseek(file_fd, (off_t)0, SEEK_END); /* lseek to the file end to find the length */
 	      (void)lseek(file_fd, (off_t)0, SEEK_SET); /* lseek back to the file start ready for reading */
-          (void)sprintf(buffer,"HTTP/1.1 200 OK\nServer: nweb/%d.0\nContent-Length: %ld\nConnection: close\nContent-Type: %s\nX-stat-req-arrival-count: %d\nX-stat-req-arrival-time: %ld seconds and %d microseconds\nX-stat-req-dispatch-count: %d\nX-stat-req-dispatch-time: %ld seconds and %d microseconds\nX-stat-req-complete-count: %d\nX-stat-req-complete-time: %ld seconds and %d microseconds\nX-stat-req-age: %d\nX-stat-thread-id: %d\nX-stat-thread-count: %d\nX-stat-thread-html: %d\nX-stat-thread-image: %d\n\n", VERSION, len, fstr,requestFromWeb->hit-1,(long)requestFromWeb->firstSaw->tv_sec,((int)requestFromWeb->firstSaw->tv_usec)/1000,requestFromWeb->passed_at_arrival,(long)requestFromWeb->passedToConsumer->tv_sec,((int)requestFromWeb->passedToConsumer->tv_usec)/1000,requestFromWeb->read_before,(long)requestFromWeb->finishedReading->tv_sec,((int)requestFromWeb->finishedReading->tv_usec)/1000,requestFromWeb->passed_at_arrival,thread_id,amount_of_requests_passed - (requestFromWeb->hit-1),requestFromWeb->thread_html_count,requestFromWeb->thread_image_count); /* Header + a blank line */
-	logger(LOG,"Header",buffer,hit);
+          (void)sprintf(requestFromWeb->buf,"HTTP/1.1 200 OK\nServer: nweb/%d.0\nContent-Length: %ld\nConnection: close\nContent-Type: %s\nX-stat-req-arrival-count: %d\nX-stat-req-arrival-time: %ld seconds and %d microseconds\nX-stat-req-dispatch-count: %d\nX-stat-req-dispatch-time: %ld seconds and %d microseconds\nX-stat-req-complete-count: %d\nX-stat-req-complete-time: %ld seconds and %d microseconds\nX-stat-req-age: %d\nX-stat-thread-id: %d\nX-stat-thread-count: %d\nX-stat-thread-html: %d\nX-stat-thread-image: %d\n\n", VERSION, len, fstr,requestFromWeb->hit-1,(long)requestFromWeb->firstSaw->tv_sec,((int)requestFromWeb->firstSaw->tv_usec)/1000,requestFromWeb->passed_at_arrival,(long)requestFromWeb->passedToConsumer->tv_sec,((int)requestFromWeb->passedToConsumer->tv_usec)/1000,requestFromWeb->read_before,(long)requestFromWeb->finishedReading->tv_sec,((int)requestFromWeb->finishedReading->tv_usec)/1000,requestFromWeb->passed_at_arrival,thread_id,amount_of_requests_passed - (requestFromWeb->hit-1),requestFromWeb->thread_html_count,requestFromWeb->thread_image_count); /* Header + a blank line */
+	logger(LOG,"Header",requestFromWeb->buf,hit);
 
-	dummy = write(fd,buffer,strlen(buffer));
+	dummy = write(fd,requestFromWeb->buf,strlen(requestFromWeb->buf));
 
 
     /* Send the statistical headers described in the paper, example below
@@ -247,17 +226,17 @@ void web(int fd, int hit, struct Request * requestFromWeb, int thread_id, int am
     (void)sprintf(buffer,"X-stat-req-arrival-count: %d\r\n", xStatReqArrivalCount);
 	dummy = write(fd,buffer,strlen(buffer));
     */
-
+	int ret;
     /* send file in 8KB block - last block may be smaller */
 	//logger(LOG,"web",buffer,0);
-	while (	(ret = read(file_fd, buffer, BUFSIZE)) > 0 ) {
+	while (	(ret = read(file_fd, requestFromWeb->buf, BUFSIZE)) > 0 ) {
 		//logger(LOG,"web",buffer,0);
-		dummy = write(fd,buffer,ret);
+		dummy = write(fd,requestFromWeb->buf,ret);
 		//logger(LOG,"web",buffer,0);
 	}
 	char eof = 0;
 	dummy = write(fd,&eof,sizeof(eof));
-	logger(LOG,"web",buffer,0);
+
 	sleep(1);	/* allow socket to drain before signalling the socket is closed */
 
 
@@ -306,6 +285,59 @@ void * producer(void *listenfdAddress){
 	  newRequest.firstSaw = &arrivalSinceStart;
 		pthread_mutex_lock(&m);
 		newRequest.passed_at_arrival = amount_of_requests_passed;
+		long ret, len, i;
+		int j, buflen;
+		//char * fstr;
+		ret = read(socketfd,newRequest.buf,BUFSIZE);
+
+			if(ret == 0 || ret == -1) {
+				logger(LOG,"failed to read browser request: ret: ","",errno);
+			}
+			if(ret > 0 && ret < BUFSIZE)	/* return code is valid chars */
+				newRequest.buf[ret]=0;		/* terminate the buffer */
+			else newRequest.buf[0]=0;
+		for(i=0;i<ret;i++)	/* remove CF and LF characters */
+			if(newRequest.buf[i] == '\r' || newRequest.buf[i] == '\n')
+			newRequest.buf[i]='*';
+		logger(LOG,"request",newRequest.buf,hit);
+		if(strncmp(newRequest.buf,"GET ",4) && strncmp(newRequest.buf,"get ",4) ) {
+		logger(FORBIDDEN,"Only simple GET operation supported",newRequest.buf,socketfd);
+		}
+		for(i=4;i<BUFSIZE;i++) { /* null terminate after the second space to ignore extra stuff */
+			if(newRequest.buf[i] == ' ') { /* string is "GET URL " +lots of other stuff */
+				newRequest.buf[i] = 0;
+				break;
+			}
+		}
+		for(j=0;j<i-1;j++) 	/* check for illegal parent directory use .. */
+			if(newRequest.buf[j] == '.' && newRequest.buf[j+1] == '.') {
+			logger(FORBIDDEN,"Parent directory (..) path names not supported",newRequest.buf,socketfd);
+			}
+		if( !strncmp(&newRequest.buf[0],"GET /\0",6) || !strncmp(&newRequest.buf[0],"get /\0",6) ) /* convert no filename to index file */
+			(void)strcpy(newRequest.buf,"GET /index.html");
+
+
+		buflen=strlen(newRequest.buf);
+		newRequest.fstr = (char *)0;
+		for(i=0;extensions[i].ext != 0;i++) {
+			len = strlen(extensions[i].ext);
+			if( !strncmp(&newRequest.buf[buflen-len], extensions[i].ext, len)) {
+				if(!strcmp(extensions[i].ext, "html") || !strcmp(extensions[i].ext, "htm")){
+					newRequest.type = TEXT;
+				}
+				else{
+					newRequest.type = IMAGE;
+				}
+				newRequest.fstr =extensions[i].filetype;
+				logger(LOG,"producer","TYPE",newRequest.type);
+				break;
+
+			}
+
+		}
+
+
+
 		//logger(LOG,"producer","got mutex lock\n",0);
 			if(requestBuffer.num > BUF_SIZE){
 				logger(LOG,"producer","fatal error num bigger than bufsize\n",0);
@@ -362,7 +394,7 @@ void * consumer(void * args){
 
 	struct Request currentRequest;
 	while(1){
-logger(LOG,"consumer","changing rem",requestBuffer.rem);
+
 		pthread_mutex_lock(&m);
 
 		if(requestBuffer.num < 0){
@@ -374,18 +406,80 @@ logger(LOG,"consumer","changing rem",requestBuffer.rem);
 			pthread_cond_wait (&c_cons, &m);
 		}
 
-
-		currentRequest = requestBuffer.requests[requestBuffer.rem];
-		requestBuffer.rem = (requestBuffer.rem+1) % BUF_SIZE;
-		requestBuffer.num--;
-		currentRequest.thread_html_count = numOfHTML;
-		currentRequest.thread_image_count = numOfImage;
-
 		struct timeval       arrivalHere;
 		struct timeval arrivalSinceStart;
 		struct timezone     arrivalHereZ;
 		gettimeofday(&arrivalHere,&arrivalHereZ);
-	  timeSubtract(&startTime,&arrivalHere,&arrivalSinceStart);
+		timeSubtract(&startTime,&arrivalHere,&arrivalSinceStart);
+
+		int count;
+		int inCount;
+		struct Request tempRequest;
+		switch (mode) {
+
+				case ANY:
+		printf("Running ANY scheduling as FIFO scheduling: ");
+				case FIFO:
+					printf("Running FIFO scheduling ");
+					currentRequest = requestBuffer.requests[requestBuffer.rem];
+		requestBuffer.rem = (requestBuffer.rem+1) % BUF_SIZE;
+		requestBuffer.num--;
+						break;
+				case HPIC:
+		printf("Running HPIC scheduling:");
+		//check if its a an Image
+		currentRequest = requestBuffer.requests[requestBuffer.rem];
+		bool isImage = false;
+		for(count = 0; count < requestBuffer.num; count++){
+			tempRequest = requestBuffer.requests[requestBuffer.rem + count];
+			if(tempRequest.type == IMAGE){
+				isImage = true;
+				//logger(LOG,"producer","TYPE 2:",tempRequest.type);
+				//logger(LOG,"consumer","THis item is an image!",0);
+				currentRequest = tempRequest;//move the rest back one, decrease add spot and number, remove stays same
+				for(inCount = count; inCount < requestBuffer.num; inCount++){
+					requestBuffer.requests[(requestBuffer.rem + inCount)  % BUF_SIZE] = requestBuffer.requests[(requestBuffer.rem + inCount) % BUF_SIZE + 1];
+				}
+				requestBuffer.add--;
+				break;
+			}
+		}
+		if(!isImage){
+			requestBuffer.rem = (requestBuffer.rem+1) % BUF_SIZE;
+		}
+		requestBuffer.num--;
+
+						break;
+				case HPHC:
+					 printf("Running HPHC scheduling: ");
+						printf("Running HPIC scheduling:");
+		//check if its a an text
+		currentRequest = requestBuffer.requests[requestBuffer.rem];
+
+		bool isText = false;
+		for(count = 0; count < requestBuffer.num; count++){
+			tempRequest = requestBuffer.requests[requestBuffer.rem + count];
+			if(tempRequest.type == TEXT){
+				isText = true;
+				currentRequest = tempRequest;//move the rest back one, decrease add spot and number, remove stays same
+				for(inCount = count; inCount < requestBuffer.num; inCount++){
+					requestBuffer.requests[(requestBuffer.rem + inCount)  % BUF_SIZE] = requestBuffer.requests[(requestBuffer.rem + inCount) % BUF_SIZE + 1];
+				}
+				requestBuffer.add--;
+				break;
+			}
+		}
+		if(!isText){
+			requestBuffer.rem = (requestBuffer.rem+1) % BUF_SIZE;
+		}
+		requestBuffer.num--;
+
+					 break;
+				default: logger(LOG,"consumer","NO mode arg",0);
+			}
+		currentRequest.thread_html_count = numOfHTML;
+		currentRequest.thread_image_count = numOfImage;
+
 		currentRequest.passedToConsumer = &arrivalSinceStart;
 		currentRequest.passed_at_passed = amount_of_requests_passed;
 		web(currentRequest.socketfd, currentRequest.hit, &currentRequest, thread_id, amount_of_requests_passed);
@@ -405,21 +499,15 @@ logger(LOG,"consumer","changing rem",requestBuffer.rem);
 
 	}
 }
-
 int main(int argc, char **argv)
 {
-
-	int ernum;
-	if((ernum = gettimeofday(&startTime,&startZone)) != 0){
-		logger(ERROR, "main", "time of day error", ernum);
-	}
-
-	int i, port,listenfd;
+	logger(LOG,"main","starting",0);
+	int i, port, /*pid, TODO: commented out because it was not in use*/ listenfd;
 
 
 	static struct sockaddr_in serv_addr; /* static = initialised to zeros */
 
-		if( argc < 3  || argc > 3 || !strcmp(argv[1], "-?") ) {
+		if( argc < 6  || argc > 6 || !strcmp(argv[1], "-?") ) {
 		(void)printf("hint: nweb Port-Number Top-Directory\t\tversion %d\n\n"
 	"\tnweb is a small and very safe mini web server\n"
 	"\tnweb only servers out file/web pages with extensions named below\n"
@@ -466,6 +554,28 @@ int main(int argc, char **argv)
 	(void)setpgrp();		/* break away from process group */
 	logger(LOG,"nweb starting",argv[1],getpid());
 	/* setup the network socket */
+
+
+	NUM_THREADS = atoi(argv[3]);
+	logger(LOG, "main", "NUM_THREADS: ",NUM_THREADS);
+
+	BUF_SIZE = atoi(argv[4]);
+	logger(LOG,"main", "BUF_SIZE",BUF_SIZE);
+
+	if (!strncmp(argv[5],"FIFO",5)){
+		mode = FIFO;
+	}
+	else if (!strncmp(argv[5],"ANY",4)){
+		mode = ANY;
+	}
+	else if (!strncmp(argv[5],"HPIC",5)){
+		mode = HPIC;
+	}
+	else if (!strncmp(argv[5],"HPHC",4)){
+		mode = HPHC;
+	}
+	logger(LOG,"main","mode: ", mode);
+
 	if((listenfd = socket(AF_INET, SOCK_STREAM,0)) <0)
 		logger(ERROR, "system call","socket",0);
 	port = atoi(argv[1]); /*converts str to int*/
@@ -487,8 +597,12 @@ int main(int argc, char **argv)
 	pthread_t prod;
 	pthread_t con_threads[NUM_THREADS];
 
-
+	//Change attribute default from joinable to detachable
+	/*pthread_attr_t attr;
+	int pthread_attr_init(pthread_attr_t *attr); //TODO does this even make sense?
+	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);*/
 	//initialize buffer (already created globally)
+
 	requestBuffer.requests = (struct Request *) malloc(sizeof(struct Request) * BUF_SIZE);
 
 	//initializing producer thread, will take in reqeusts, package them, and place them on a queue
@@ -498,9 +612,8 @@ int main(int argc, char **argv)
 	//initializning the pool of threads, NUM_THREADS will be command-line input
 	//attr was changed to make the threads detachable rather than joinable
 	for(j = 0; j < NUM_THREADS; j++){
-		int id = j;
 
-		pthread_create(&(con_threads[j]), NULL, consumer,(void *)&id);
+		pthread_create(&(con_threads[j]), NULL, consumer,NULL);
 	}
 
 	//while(1){}
