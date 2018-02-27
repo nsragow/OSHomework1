@@ -22,7 +22,7 @@
 
 
 
-//Constants //TODO figure out how to really handle these values
+//Constants
 const int NUM_THREADS = 1;
 const int BUF_SIZE = 10;
 
@@ -79,7 +79,7 @@ struct Request{
 	struct timeval * finishedReading;
 };
 
-struct Buffer{//TODO: make function to initilize this
+struct Buffer{
 	struct Request *requests;
 
 	//FOR STATS
@@ -153,10 +153,10 @@ void web(int fd, int hit, struct Request * requestFromWeb, int thread_id, int am
 	int j, file_fd, buflen;
 	long i, ret, len;
 	char * fstr;
-	static char buffer[BUFSIZE+1]; /* static so zero filled */
+	char buffer[BUFSIZE+1] = requestFromWeb->buf; /* static so zero filled */
 
 
-	ret =read(fd,buffer,BUFSIZE); 	/* read Web request in one go */
+	//ret =read(fd,buffer,BUFSIZE); 	/* read Web request in one go */
 
 
 	if(ret == 0 || ret == -1) {	/* read failure stop now */
@@ -266,7 +266,7 @@ void web(int fd, int hit, struct Request * requestFromWeb, int thread_id, int am
 void * producer(void *listenfdAddress){
 	int hit, socketfd;
 
-	int listenfd = *(int *)listenfdAddress;//TODO thsi line must be causing an error
+	int listenfd = *(int *)listenfdAddress;
 
 	socklen_t length;
 
@@ -349,9 +349,7 @@ void * producer(void *listenfdAddress){
 		pthread_mutex_unlock(&m);
 		//logger(LOG,"producer","mutex unlocked\n",0);
 		pthread_cond_signal(&c_cons);
-		//printf("producer inserted %d\n", newRequest); fflush(stdout);//TODO: not sure what you wanted with this code but its not properly formated so commented it out
-		//(void)close(socketfd);//TODO:needs to check for errors
-		//logger(LOG,"producer","looping",1);
+
 	}
 }
 
@@ -361,7 +359,7 @@ void * consumer(void * args){
 	int numOfHTML = 0;
 	int numOfImage = 0;
 
-	//TODO: add time recieved
+
 	struct Request currentRequest;
 	while(1){
 logger(LOG,"consumer","changing rem",requestBuffer.rem);
@@ -395,83 +393,15 @@ logger(LOG,"consumer","changing rem",requestBuffer.rem);
 		numOfImage = currentRequest.thread_image_count;
 		amount_of_requests_passed++;
 		pthread_mutex_unlock(&m);
- /*
-		switch (mode) {
 
-        case ANY:
-		printf("Running ANY scheduling as FIFO scheduling: ");
-        case FIFO:
-        	printf("Running FIFO scheduling ");
-        	currentRequest = requestBuffer[requestBuffer.rem];
-		requestBuffer.rem = (requestBuffer.rem+1) % BUF_SIZE;
-		requestBuffer.num--;
-            break;
-        case HPIC:
-		printf("Running HPIC scheduling:");
-		//check if its a an Image
-		int count;
-		int inCount;
-		currentRequest = requestBuffer[requestBuffer.rem];
-		struct Request tempRequest;
-		bool isImage = false;
-		for(count = 0; count < requestBuffer.num; count++){
-			tempRequest = requestBuffer[requestBuffer.rem + count]
-			if(tempRequest.type = IMAGE){
-				isImage = true;
-				currentRequest = tempRequest;//move the rest back one, decrease add spot and number, remove stays same
-				for(inCount = count; inCount < requestBuffer.num; inCount++){
-					requestBuffer[(requestBuffer.rem + inCount)  % BUF_SIZE] = requestBuffer[(requestBuffer.rem + inCount) % BUF_SIZE + 1];
-				}
-				requestBuffer.add--;
-				break;
-			}
-		}
-		if(!isImage){
-			requestBuffer.rem = (requestBuffer.rem+1) % BUF_SIZE;
-		}
-		requestBuffer.num--;
 
-            break;
-        case HPHC:
-           printf("Running HPHC scheduling: ");
-           	printf("Running HPIC scheduling:");
-		//check if its a an text
-		int count;
-		int inCount;
-		currentRequest = requestBuffer[requestBuffer.rem];
-		struct Request tempRequest;
-		bool isText = false;
-		for(count = 0; count < requestBuffer.num; count++){
-			tempRequest = requestBuffer[requestBuffer.rem + count]
-			if(tempRequest.type = TEXT){
-				isText = true;
-				currentRequest = tempRequest;//move the rest back one, decrease add spot and number, remove stays same
-				for(inCount = count; inCount < requestBuffer.num; inCount++){
-					requestBuffer[(requestBuffer.rem + inCount)  % BUF_SIZE] = requestBuffer[(requestBuffer.rem + inCount) % BUF_SIZE + 1];
-				}
-				requestBuffer.add--;
-				break;
-			}
-		}
-		if(!isText){
-			requestBuffer.rem = (requestBuffer.rem+1) % BUF_SIZE;
-		}
-		requestBuffer.num--;
 
-           break;
-        default:
-   		}
-   */
-		//(void)close(currentRequest.listenfd);
-
-	logger(LOG,"consumer","about to run web with",currentRequest.socketfd);
-	//TODO make sure you check on the type that was now updated
 	numOfProcessedRequests++;
-	logger(LOG,"consumer","finished with web",0);
+
 	pthread_cond_signal (&c_prod);
-	logger(LOG,"consumer","about to close socket",currentRequest.socketfd);
+
 	(void)close(currentRequest.socketfd);
-	logger(LOG,"consumer","looping",0);
+
 
 	}
 }
@@ -484,7 +414,7 @@ int main(int argc, char **argv)
 		logger(ERROR, "main", "time of day error", ernum);
 	}
 
-	int i, port, /*pid, TODO: commented out because it was not in use*/ listenfd;
+	int i, port,listenfd;
 
 
 	static struct sockaddr_in serv_addr; /* static = initialised to zeros */
@@ -557,10 +487,6 @@ int main(int argc, char **argv)
 	pthread_t prod;
 	pthread_t con_threads[NUM_THREADS];
 
-	//Change attribute default from joinable to detachable
-	/*pthread_attr_t attr;
-	int pthread_attr_init(pthread_attr_t *attr); //TODO does this even make sense?
-	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);*/
 
 	//initialize buffer (already created globally)
 	requestBuffer.requests = (struct Request *) malloc(sizeof(struct Request) * BUF_SIZE);
@@ -581,16 +507,3 @@ int main(int argc, char **argv)
 	int returnOfMainThread = 1;
 	pthread_exit((void *)&returnOfMainThread);
 }
-//arrival time
-//amount arrived before (hit - 1)
-
-//got by worker time
-
-//amount of requests read before this was read
-//time at end of read
-
-//how many requests got to a worker thread before this one (could use the number of completed requests)
-
-//keep track of thread ids ~~
-//the number of requests a single thread has proccessed ~~
-//number of html v image ~~
