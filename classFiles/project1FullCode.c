@@ -12,7 +12,7 @@
 #include <pthread.h>
 #include <sys/time.h>
 #define VERSION    23
-#define BUFSIZE  8096
+#define BUFSIZE  18096
 #define ERROR      42
 #define LOG        44
 #define FORBIDDEN 403
@@ -23,7 +23,7 @@
 
 
 //Constants //TODO figure out how to really handle these values
-const int NUM_THREADS = 10;
+const int NUM_THREADS = 1;
 const int BUF_SIZE = 10;
 
 const int IMAGE_TYPE = 0;
@@ -147,18 +147,18 @@ void timeSubtract(struct timeval * original,struct timeval * now, struct timeval
 }
 
 /* this is a child web server process, so we can exit on errors */
-void web(int fd, int hit, struct Request * requestFromWeb)
+void web(int fd, int hit, struct Request * requestFromWeb, int thread_id, int amount_of_requests_passed)
 {
-	logger(LOG,"web","fd",fd);
+
 	int j, file_fd, buflen;
 	long i, ret, len;
 	char * fstr;
 	static char buffer[BUFSIZE+1]; /* static so zero filled */
-	logger(LOG,"web","to read",fd);
-	logger(LOG,"this is what buffer looks like before",buffer,errno);
+
+
 	ret =read(fd,buffer,BUFSIZE); 	/* read Web request in one go */
 
-	logger(LOG,"this is what buffer looks like",buffer,errno);
+
 	if(ret == 0 || ret == -1) {	/* read failure stop now */
 		logger(LOG,"failed to read browser request","errno",errno);
 		logger(LOG,"failed to read browser request",buffer,errno);
@@ -202,34 +202,29 @@ void web(int fd, int hit, struct Request * requestFromWeb)
 	if(fstr == 0) logger(FORBIDDEN,"file extension type not supported",buffer,fd);
 
 	if(fstr == extensions[0].filetype){
-		requestFromWeb->type = IMAGE_TYPE;
+		requestFromWeb->thread_image_count++;
 	}
 	else if(fstr == extensions[1].filetype){
-		requestFromWeb->type = IMAGE_TYPE;
+		requestFromWeb->thread_image_count++;
 	}
 	else if(fstr == extensions[2].filetype){
-		requestFromWeb->type = IMAGE_TYPE;
+		requestFromWeb->thread_image_count++;
 	}
 	else if(fstr == extensions[3].filetype){
-		requestFromWeb->type = IMAGE_TYPE;
+		requestFromWeb->thread_image_count++;
 	}
 	else if(fstr == extensions[4].filetype){
-		requestFromWeb->type = IMAGE_TYPE;
+		requestFromWeb->thread_image_count++;
 	}
 	else{
-		requestFromWeb->type = HTML_TYPE;
+		requestFromWeb->thread_html_count++;
+		logger(LOG, "faie","report",requestFromWeb->thread_html_count);
 	}
 
-	logger(LOG,"web","about to open",0);
+
 	if(( file_fd = open(&buffer[5],O_RDONLY)) == -1) {  /* open the file for reading */
 		logger(NOTFOUND, "failed to open file",&buffer[5],fd);
 	}
-	logger(LOG,"SEND",&buffer[5],hit);
-	len = (long)lseek(file_fd, (off_t)0, SEEK_END); /* lseek to the file end to find the length */
-	      (void)lseek(file_fd, (off_t)0, SEEK_SET); /* lseek back to the file start ready for reading */
-          (void)sprintf(buffer,"HTTP/1.1 200 OK\nServer: nweb/%d.0\nContent-Length: %ld\nConnection: close\nContent-Type: %s\n\n", VERSION, len, fstr); /* Header + a blank line */
-	logger(LOG,"Header",buffer,hit);
-
 	struct timeval       arrivalHere;
 	struct timeval arrivalSinceStart;
 	struct timezone     arrivalHereZ;
@@ -238,6 +233,12 @@ void web(int fd, int hit, struct Request * requestFromWeb)
 	requestFromWeb->finishedReading = &arrivalSinceStart;
 	requestFromWeb->read_before = amount_of_requests_read;
 	amount_of_requests_read++;
+	logger(LOG,"SEND",&buffer[5],hit);
+	len = (long)lseek(file_fd, (off_t)0, SEEK_END); /* lseek to the file end to find the length */
+	      (void)lseek(file_fd, (off_t)0, SEEK_SET); /* lseek back to the file start ready for reading */
+          (void)sprintf(buffer,"HTTP/1.1 200 OK\nServer: nweb/%d.0\nContent-Length: %ld\nConnection: close\nContent-Type: %s\nX-stat-req-arrival-count: %d\nX-stat-req-arrival-time: %ld\nX-stat-req-dispatch-count: %d\nX-stat-req-dispatch-time: %ld\nX-stat-req-complete-count: %d\nX-stat-req-complete-time: %ld\nX-stat-req-age: %d\nX-stat-thread-id: %d\nX-stat-thread-count: %d\nX-stat-thread-html: %d\nX-stat-thread-image: %d\n\n", VERSION, len, fstr,requestFromWeb->hit-1,(long)requestFromWeb->firstSaw->tv_sec,requestFromWeb->passed_at_arrival,(long)requestFromWeb->passedToConsumer->tv_sec,requestFromWeb->read_before,(long)requestFromWeb->finishedReading->tv_sec,requestFromWeb->passed_at_arrival,thread_id,amount_of_requests_passed,requestFromWeb->thread_html_count,requestFromWeb->thread_image_count); /* Header + a blank line */
+	logger(LOG,"Header",buffer,hit);
+
 
 
 	dummy = write(fd,buffer,strlen(buffer));
@@ -250,15 +251,15 @@ void web(int fd, int hit, struct Request * requestFromWeb)
     */
 
     /* send file in 8KB block - last block may be smaller */
-	logger(LOG,"web","about to loop write",0);
+	//logger(LOG,"web",buffer,0);
 	while (	(ret = read(file_fd, buffer, BUFSIZE)) > 0 ) {
-		logger(LOG,"web","writing to",fd);
+		//logger(LOG,"web",buffer,0);
 		dummy = write(fd,buffer,ret);
-		logger(LOG,"web","writing finito",fd);
+		//logger(LOG,"web",buffer,0);
 	}
 	char eof = 0;
 	dummy = write(fd,&eof,sizeof(eof));
-	logger(LOG,"web","finished loop write",0);
+	logger(LOG,"web",buffer,0);
 	sleep(1);	/* allow socket to drain before signalling the socket is closed */
 
 
@@ -359,7 +360,9 @@ void * producer(void *listenfdAddress){
 void * consumer(void * args){
 	int thread_id = *(int *)args;
 	int numOfProcessedRequests = 0;
-	thread_id++;//TODO temp to supress errors
+	int numOfHTML = 0;
+	int numOfImage = 0;
+
 	//TODO: add time recieved
 	struct Request currentRequest;
 	while(1){
@@ -379,6 +382,8 @@ logger(LOG,"consumer","changing rem",requestBuffer.rem);
 		currentRequest = requestBuffer.requests[requestBuffer.rem];
 		requestBuffer.rem = (requestBuffer.rem+1) % BUF_SIZE;
 		requestBuffer.num--;
+		currentRequest.thread_html_count = numOfHTML;
+		currentRequest.thread_image_count = numOfImage;
 
 		struct timeval       arrivalHere;
 		struct timeval arrivalSinceStart;
@@ -387,8 +392,10 @@ logger(LOG,"consumer","changing rem",requestBuffer.rem);
 	  timeSubtract(&startTime,&arrivalHere,&arrivalSinceStart);
 		currentRequest.passedToConsumer = &arrivalSinceStart;
 		currentRequest.passed_at_passed = amount_of_requests_passed;
+		web(currentRequest.socketfd, currentRequest.hit, &currentRequest, thread_id, amount_of_requests_passed);
+		numOfHTML = currentRequest.thread_html_count;
+		numOfImage = currentRequest.thread_image_count;
 		amount_of_requests_passed++;
-		web(currentRequest.socketfd, currentRequest.hit, &currentRequest);
 		pthread_mutex_unlock(&m);
  /*
 		switch (mode) {
@@ -478,7 +485,7 @@ int main(int argc, char **argv)
 	if((ernum = gettimeofday(&startTime,&startZone)) != 0){
 		logger(ERROR, "main", "time of day error", ernum);
 	}
-	logger(LOG,"main","starting",0);
+
 	int i, port, /*pid, TODO: commented out because it was not in use*/ listenfd;
 
 
