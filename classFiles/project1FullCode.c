@@ -24,7 +24,8 @@
 #define ANY         3
 #define HPIC	    4
 #define HPHC	    5
-
+#define IMAGE_TYPE  0 
+#define HTML_TYPE 1
 
 
 //Constants
@@ -32,8 +33,7 @@ int NUM_THREADS;
 int BUF_SIZE;
 int mode;
 
-const int IMAGE_TYPE = 0;
-const int HTML_TYPE = 1;
+
 
 //intiating mutex and conditions from the start so that it could be shared by both the consumer and producer method
 //without having to make it a parameter
@@ -45,7 +45,7 @@ struct timezone startZone;
 
 int amount_of_requests_read;
 int amount_of_requests_passed;
-int mode;
+
 
 /*
 1) Struct to hold the jobs
@@ -164,13 +164,10 @@ void web(int fd, int hit, struct Request * requestFromWeb, int thread_id, int am
 
 
 
-
-
-
-
 	/* work out the file type and check we support it */
 	buflen=strlen(requestFromWeb->buf);
 	fstr = (char *)0;
+	
 	for(i=0;extensions[i].ext != 0;i++) {
 		len = strlen(extensions[i].ext);
 		if( !strncmp(&requestFromWeb->buf[buflen-len], extensions[i].ext, len)) {
@@ -251,7 +248,7 @@ void * producer(void *listenfdAddress){
 
 
 
-
+	logger(LOG,"producer","producer begins", 0);
 
 	for(hit=1; ;hit++) {
 		struct sockaddr_in cli_addr; /* static = initialised to zeros */
@@ -263,7 +260,7 @@ void * producer(void *listenfdAddress){
 		}
 
 		length = sizeof(cli_addr);
-		//logger(LOG,"producer","about to accept",0);
+		logger(LOG,"producer","about to accept",0);
 		if((socketfd = accept(listenfd, (struct sockaddr *)&cli_addr, &length)) < 0)
 			logger(ERROR,"system call","accept",0);
 
@@ -390,7 +387,8 @@ void * consumer(void * args){
 	int numOfProcessedRequests = 0;
 	int numOfHTML = 0;
 	int numOfImage = 0;
-
+	
+	logger(LOG,"consumer","born", 0);
 
 	struct Request currentRequest;
 	while(1){
@@ -423,6 +421,7 @@ void * consumer(void * args){
 					printf("Running FIFO scheduling ");
 					currentRequest = requestBuffer.requests[requestBuffer.rem];
 		requestBuffer.rem = (requestBuffer.rem+1) % BUF_SIZE;
+		logger(LOG,"consumer","changing rem",requestBuffer.rem);
 		requestBuffer.num--;
 						break;
 				case HPIC:
@@ -439,6 +438,7 @@ void * consumer(void * args){
 				currentRequest = tempRequest;//move the rest back one, decrease add spot and number, remove stays same
 				for(inCount = count; inCount < requestBuffer.num; inCount++){
 					requestBuffer.requests[(requestBuffer.rem + inCount)  % BUF_SIZE] = requestBuffer.requests[(requestBuffer.rem + inCount) % BUF_SIZE + 1];
+					logger(LOG,"consumer","changing rem",requestBuffer.rem);
 				}
 				requestBuffer.add--;
 				break;
@@ -446,6 +446,7 @@ void * consumer(void * args){
 		}
 		if(!isImage){
 			requestBuffer.rem = (requestBuffer.rem+1) % BUF_SIZE;
+			logger(LOG,"consumer","changing rem",requestBuffer.rem);
 		}
 		requestBuffer.num--;
 
@@ -464,6 +465,7 @@ void * consumer(void * args){
 				currentRequest = tempRequest;//move the rest back one, decrease add spot and number, remove stays same
 				for(inCount = count; inCount < requestBuffer.num; inCount++){
 					requestBuffer.requests[(requestBuffer.rem + inCount)  % BUF_SIZE] = requestBuffer.requests[(requestBuffer.rem + inCount) % BUF_SIZE + 1];
+					logger(LOG,"consumer","changing rem",requestBuffer.rem);
 				}
 				requestBuffer.add--;
 				break;
@@ -471,6 +473,7 @@ void * consumer(void * args){
 		}
 		if(!isText){
 			requestBuffer.rem = (requestBuffer.rem+1) % BUF_SIZE;
+			logger(LOG,"consumer","changing rem",requestBuffer.rem);
 		}
 		requestBuffer.num--;
 
@@ -499,6 +502,7 @@ void * consumer(void * args){
 
 	}
 }
+
 int main(int argc, char **argv)
 {
 	logger(LOG,"main","starting",0);
@@ -574,7 +578,7 @@ int main(int argc, char **argv)
 	else if (!strncmp(argv[5],"HPHC",4)){
 		mode = HPHC;
 	}
-	logger(LOG,"main","mode: ", mode);
+	//logger(LOG,"main","mode: ", mode);
 
 	if((listenfd = socket(AF_INET, SOCK_STREAM,0)) <0)
 		logger(ERROR, "system call","socket",0);
@@ -594,6 +598,7 @@ int main(int argc, char **argv)
 
 	//Initialize our threads
 	int j;
+	int k;
 	pthread_t prod;
 	pthread_t con_threads[NUM_THREADS];
 
@@ -606,14 +611,17 @@ int main(int argc, char **argv)
 	requestBuffer.requests = (struct Request *) malloc(sizeof(struct Request) * BUF_SIZE);
 
 	//initializing producer thread, will take in reqeusts, package them, and place them on a queue
-
-	pthread_create(&prod, NULL, producer, &listenfd);
+	logger(LOG,"main","created producer", listenfd);
+	k = pthread_create(&prod, NULL, producer, &listenfd);
+	logger(LOG,"main","producer create result:", k);
 
 	//initializning the pool of threads, NUM_THREADS will be command-line input
 	//attr was changed to make the threads detachable rather than joinable
+	//logger(LOG,"main","created consumers", 0);
 	for(j = 0; j < NUM_THREADS; j++){
-
-		pthread_create(&(con_threads[j]), NULL, consumer,NULL);
+		int id = j;
+		k = pthread_create(&(con_threads[j]), NULL, consumer,(void *)&id);;
+		logger(LOG,"main","consumer create result:", k);
 	}
 
 	//while(1){}
