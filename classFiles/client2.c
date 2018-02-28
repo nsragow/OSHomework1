@@ -12,9 +12,12 @@
 
 #define BUF_SIZE 100
 
+void GET(char *path);
+
 int clientfd;
 pthread_mutex_t lock;
 pthread_barrier_t barrier;
+
 // Get host information (used to establishConnection)
 struct addrinfo *getHostInfo(char* host, char* port) {
   int r;
@@ -58,22 +61,24 @@ int establishConnection(struct addrinfo *info) {
   return -1;
 }
 
-void * thread(char **argv){
+void * thread(void * argv2){
   // Send GET request > stdout
+  char *argv = (char*)argv2;
   char buf[BUF_SIZE];
-  GET(clientfd, argv[5]);
+  printf("\t%s yo \t",argv);
+  GET(argv);
   pthread_barrier_wait(&barrier);
 
   while (recv(clientfd, buf, BUF_SIZE, 0) > 0) {
     fputs(buf, stdout);
     memset(buf, 0, BUF_SIZE);
   }
-
-  pthread_exit(NULL);
+  
+  pthread_exit(NULL);//instead of NULL
 }
 
 // Send GET request
-void GET(int clientfd, char *path) {
+void GET(char *path) {
   char req[1000] = {0};
   pthread_mutex_lock(&lock);
   sprintf(req, "GET %s HTTP/1.0\r\n\r\n", path);
@@ -84,7 +89,7 @@ void GET(int clientfd, char *path) {
 
 int main(int argc, char **argv) {
   pthread_barrierattr_t attr;
-  pthread_barrier_init(&barrier, &attr, argv[3]);
+  pthread_barrier_init(&barrier, &attr, (int)*argv[3]);
 
   if (argc != 6 && argc != 7) {
     fprintf(stderr, "USAGE: ./httpclient <hostname> <port> <threads> <schedalg> <request path> <request path2>\n");
@@ -103,14 +108,22 @@ int main(int argc, char **argv) {
     return 3;
   }
 
-  pthread_t t [(int) *argv[3]];
+  pthread_t t [atoi(argv[3])];
   int i = 0;
-  while(1){
-  	for(i = 0; i < (int) *argv[3]; i++){
-  		pthread_create(&t[i], NULL, thread , argv);
+  int j = 0;
+  while(j<10){
+  	//printf("yolo");
+  	for(i = 0; i < atoi(argv[3]); i++){
+  		//printf("here0");
+  		if(pthread_create(&t[i], NULL, thread , (void*)argv[5])){
+  			perror("could not create thread");
+  		}
+  		printf("here1");
+  		//printf("here2");
   	}
+  	//pthread_join(t[1],NULL);
+  	j++;
   }
-
   close(clientfd);
 
   return 0;
