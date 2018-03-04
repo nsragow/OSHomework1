@@ -1,16 +1,26 @@
 # OSHomework1
 1) Team:
-  Joseph Sklar- 800186021 
-  Noah Sragow-
-  Jacob Stern-
+
+    Joseph Sklar- 800186021 
+  
+    Noah Sragow-
+  
+    Jacob Stern-
+  
 2) Division of Labor:
-  Joseph Sklar- Parts 1 and 2
-  Noah Sragow- Parts 1 and 3
-  Jacob Stern- Part 4
+
+    Joseph Sklar- Parts 1 and 2
+  
+    Noah Sragow- Parts 1 and 3
+  
+    Jacob Stern- Part 4
+  
 3) Important Information/Structures in Server:
+
     Request: Represents a request made to the server, keeps track of important pieces of
     information neccessary to properly pass the information through to the web() method as well
     as important statistical categories necessary for part 3.
+    
     Buffer: Reperesents a buffer needed to hold requests as they wait to be recieved by threads. 
     It also records important statistical categories necessary for part 3.
     
