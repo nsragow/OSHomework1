@@ -35,5 +35,9 @@
     As far as we know there are no bugs.
   
  4) Important Information/Structures in client.
- 
+    The client is passed 6 or 7 arguments to start up. At the present the schedalg argument is unused because I ran into a debugging 
+    issue which halted my progress. However as it is programmed at the moment it is supposed to run an infinite outer loop around an 
+    inner loop whihch creates N threads to run the get and send functions. The schedalg concur is always used. The program uses a       
+    pthread barrier to wait for N threads to complete the GET before starting the send. The program uses mutexes to protect file reading 
+    and writing when processing the GET request.   
     
