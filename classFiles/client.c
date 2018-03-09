@@ -65,31 +65,30 @@ void * thread(void * argv2){
   // Send GET request > stdout
   char *argv = (char*)argv2;
   char buf[BUF_SIZE];
-  printf("\t%s yo \t",argv);
   GET(argv);
   pthread_barrier_wait(&barrier);
-
+  printf("hi there");
   while (recv(clientfd, buf, BUF_SIZE, 0) > 0) {
     fputs(buf, stdout);
     memset(buf, 0, BUF_SIZE);
   }
-  
-  pthread_exit(NULL);//instead of NULL
+  pthread_barrier_wait(&barrier);
+  return NULL;
 }
 
 // Send GET request
 void GET(char *path) {
   char req[1000] = {0};
-  pthread_mutex_lock(&lock);
+  //pthread_mutex_lock(&lock);
   sprintf(req, "GET %s HTTP/1.0\r\n\r\n", path);
-  pthread_mutex_unlock(&lock);
+  //pthread_mutex_unlock(&lock);
   pthread_barrier_wait(&barrier);
   send(clientfd, req, strlen(req), 0);
 }
 
 int main(int argc, char **argv) {
-  pthread_barrierattr_t attr;
-  pthread_barrier_init(&barrier, &attr, (int)*argv[3]);
+  // pthread_barrierattr_t attr; 
+  pthread_barrier_init(&barrier, NULL, atoi(argv[3]));
 
   if (argc != 6 && argc != 7) {
     fprintf(stderr, "USAGE: ./httpclient <hostname> <port> <threads> <schedalg> <request path> <request path2>\n");
@@ -113,15 +112,27 @@ int main(int argc, char **argv) {
   int j = 0;
   while(j<10){
   	//printf("yolo");
+
+
   	for(i = 0; i < atoi(argv[3]); i++){
-  		//printf("here0");
-  		pthread_create(&t[i], NULL, thread , (void*)argv[5]);
-  		printf("here1");
-  		//printf("here2");
+  		if(pthread_create(&t[i], NULL, thread , (void*)argv[5]) != 0) {
+  			perror("pthread_create() error");
+  			exit(1);
+  		}
   	}
-  	//pthread_join(t[1],NULL);
+  	printf("hi");
+  	pthread_barrier_wait(&barrier);//maybe
+  	printf("hi2");
+  	for(i = 0; i < atoi(argv[3]); i++){
+  		if(pthread_join(t[i], NULL) != 0){
+  			perror("pthread_join() error");
+  			exit(3);
+  		}
+  	}
+  	printf("yolo");
   	j++;
   }
+  printf("\n look over here!!!!!!!!");
   close(clientfd);
 
   return 0;
